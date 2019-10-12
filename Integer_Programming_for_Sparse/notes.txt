@@ -4,6 +4,8 @@ How to run:
 make colour // in this directory
 ./colour ./<directory_name>
 
+right now, the directory name is = ./../Suite-Sparse \Graphs/
+
 ----------------
 What it does:
 ----------------
