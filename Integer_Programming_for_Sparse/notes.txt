@@ -1,3 +1,10 @@
 ----------------
 How to run:
 ----------------
+make colour // in this directory
+./colour ./<directory_name>
+
+----------------
+What it does:
+----------------
+I the same directory, it creates an .csv output file
