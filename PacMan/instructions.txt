@@ -1,0 +1,32 @@
+--------------------------------------------------------------------
+LINKS
+--------------------------------------------------------------------
+
+* Homework link : http://ai.berkeley.edu/reinforcement.html
+* Article link  : http://cs229.stanford.edu/proj2017/final-reports/5241109.pdf
+
+--------------------------------------------------------------------
+REQUIREMENTS
+--------------------------------------------------------------------
+
+* Python 2.7
+* python-tk package
+
+--------------------------------------------------------------------
+GRADER
+--------------------------------------------------------------------
+
+* This can be run on all questions with the command:
+>> python autograder.py
+
+* It can be run for one particular question, such as q2, by:
+>> python autograder.py -q q2
+
+--------------------------------------------------------------------
+INFORMATION
+--------------------------------------------------------------------
+* Files to Edit:
+>> valueIterationAgents.py 	  A value iteration agent for solving known MDPs.
+>> qlearningAgents.py 	      Q-learning agents for Gridworld, Crawler and Pacman.
+>> analysis.py 	              A file to put your answers to questions given in the project.
+
