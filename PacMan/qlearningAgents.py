@@ -41,8 +41,8 @@ class QLearningAgent(ReinforcementAgent):
     def __init__(self, **args):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
-
         "*** YOUR CODE HERE ***"
+        self.q_val = util.Counter()
 
     def getQValue(self, state, action):
         """
@@ -51,7 +51,9 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if(len(self.q_val) == 0):
+          return 0.0
+        return self.q_val[(state, action)]
 
 
     def computeValueFromQValues(self, state):
@@ -62,7 +64,16 @@ class QLearningAgent(ReinforcementAgent):
           terminal state, you should return a value of 0.0.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        all_actions = self.getLegalActions(state)
+        if(len(all_actions) == 0):
+          return 0.0
+        max_qVal = float("-inf")
+        for action in all_actions:
+          temp_qVal = self.getQValue(state, action)
+          if(temp_qVal > max_qVal):
+            max_qVal = temp_qVal
+        return max_qVal
+
 
     def computeActionFromQValues(self, state):
         """
@@ -71,7 +82,19 @@ class QLearningAgent(ReinforcementAgent):
           you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        all_actions = self.getLegalActions(state)
+        if(len(all_actions) == 0):
+          return None
+        max_qVal = float("-inf")
+        max_action = None
+        for action in all_actions:
+          temp_qVal = self.getQValue(state, action)
+          if(temp_qVal > max_qVal):
+            max_qVal = temp_qVal
+            max_action = action
+          elif(temp_qVal == max_qVal):
+            max_action = random.choice([max_action, action])
+        return max_action
 
     def getAction(self, state):
         """
@@ -102,7 +125,14 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        q_copy = util.Counter()
+        q_copy = self.q_val.copy()
+
+        inter_q = reward + self.discount * self.computeValueFromQValues(nextState)
+        next_q = (1 - self.alpha) * self.getQValue(state, action) + self.alpha * inter_q
+        self.q_val[(state, action)] = next_q
+
+        
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
