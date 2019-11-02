@@ -12,7 +12,7 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-import mdp, util
+import mdp, util, random
 
 from learningAgents import ValueEstimationAgent
 
@@ -45,7 +45,25 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
-
+        vcurr = util.Counter()
+        for iter in range(self.iterations):
+            vcurr = self.values.copy()
+            all_states = self.mdp.getStates()
+            for state in all_states:
+                if(self.mdp.isTerminal(state)):
+                    self.values[state] = 0
+                else:
+                    action = self.computeActionFromValues(state)
+                    actions = self.mdp.getPossibleActions(state)
+                    best_val = float("-inf")
+                    for action in actions:
+                        transitions = self.mdp.getTransitionStatesAndProbs(state, action)
+                        n_val = 0
+                        for trans in transitions:
+                            n_val += trans[1] * (self.mdp.getReward(state, action, trans[0]) + self.discount * vcurr[trans[0]])
+                        if(n_val > best_val):
+                            best_val = n_val
+                    self.values[state] = best_val
 
     def getValue(self, state):
         """
@@ -53,6 +71,24 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         return self.values[state]
 
+    def getNextState(self, state, action):
+        next_state = [0, 0]
+        if(action == 'west'):
+            next_state[0] = state[0] - 1
+            next_state[1] = state[1]
+        elif(action == 'east'):
+            next_state[0] = state[0] + 1
+            next_state[1] = state[1]
+        elif(action == 'north'):
+            next_state[0] = state[0] 
+            next_state[1] = state[1] + 1
+        elif(action == 'south'):
+            next_state[0] = state[0] 
+            next_state[1] = state[1] - 1
+        else:
+            next_state = str('TERMINAL STATE')
+
+        return next_state
 
     def computeQValueFromValues(self, state, action):
         """
@@ -60,7 +96,11 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        transitions = self.mdp.getTransitionStatesAndProbs(state, action)
+        n_val = 0
+        for trans in transitions:
+            n_val += trans[1] * (self.mdp.getReward(state, action, trans[0]) + self.discount * self.values[trans[0]])
+        return n_val
 
     def computeActionFromValues(self, state):
         """
@@ -72,8 +112,19 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        if(self.mdp.isTerminal(state)):
+            return None 
+        
+        actions = self.mdp.getPossibleActions(state)
+        best_val = float("-inf")
+        best_action = None
+        for action in actions:
+            n_val = self.computeQValueFromValues(state, action)
+            if(n_val > best_val):
+                best_action = action
+                best_val = n_val
+        return best_action    
+        
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
 
