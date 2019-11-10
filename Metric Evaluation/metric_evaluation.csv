@@ -1,4 +1,4 @@
-Graph Name, Num_nodes, Num_edges, DegreeOrderDesc, DegreeOrderAsc, Random, ClusteringCoeffDesc,ClusteringCoeffAsc, ClosenessCentralityDesc, ClosenessCentralityAsc, PageRankDesc, PageRankDesc , Colors
+Graph Name, Num_nodes, Num_edges, DegreeOrderDesc, DegreeOrderAsc, Random, ClusteringCoeffDesc,ClusteringCoeffAsc, ClosenessCentralityDesc, ClosenessCentralityAsc, PageRankDesc, PageRankAsc , Colors
 west0479.mtx,479,1910,6,8,6,7,7,7,7,8,7,4
 Trefethen_200.mtx,200,1545,9,8,9,8,9,8,6,8,4,3
 spaceStation_2.mtx,329,2999,8,8,10,8,8,7,7,7,7,7
