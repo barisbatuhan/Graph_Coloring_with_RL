@@ -134,22 +134,51 @@ void degree_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & 
 }
 
 
-void page_rank(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering, int iter=100){
-  for(int i=0; i<num_nodes; i++){ordering[i] = pair<int,float>(i, (float)1/num_nodes);} // initially likelyhoods are uniformly distributed
+// void page_rank(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering, int iter=100){
+//   for(int i=0; i<num_nodes; i++){ordering[i] = pair<int,float>(i, (float)1/num_nodes);} // initially likelyhoods are uniformly distributed
 
+//   for(int i=0; i<iter; i++){ // on each iteration (required for convergence)
+//     for(int v=0; v<num_nodes; v++){ // for each node v
+//       float & pr_v = ordering[v].second; // update page rank of v by looking its in-degree nodes
+//       for(int edge = row_ptr[v]; edge<row_ptr[v+1]; edge++){ // for each in degree neighbor of v (since graph is symmetric in or out degree does not matter)
+//         const int & adj = col_ind[edge];
+//         float & pr_adj = ordering[adj].second;
+//         int degree_adj = row_ptr[adj+1]-row_ptr[adj];
+//         pr_v += pr_adj/degree_adj; // page_rank_of_v <- page_rank_of_v + page_rank_of_neighbor/out_degree_of_neighbor
+//       }
+//     }
+//   }
+// }
+
+void page_rank(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering, int iter=100, float alpha = 0.85){
+  for(int i=0; i<num_nodes; i++){ordering[i] = pair<int,float>(i, (float)1/num_nodes);} // initially likelyhoods are uniformly distributed
+  
   for(int i=0; i<iter; i++){ // on each iteration (required for convergence)
+    vector<pair<int, float>> copy_ordering(num_nodes, pair<int,float>(0, 0.0));
+    for(int j = 0; j < num_nodes; j++){
+      copy_ordering[j].first = j;
+    }
     for(int v=0; v<num_nodes; v++){ // for each node v
       float & pr_v = ordering[v].second; // update page rank of v by looking its in-degree nodes
       for(int edge = row_ptr[v]; edge<row_ptr[v+1]; edge++){ // for each in degree neighbor of v (since graph is symmetric in or out degree does not matter)
         const int & adj = col_ind[edge];
         float & pr_adj = ordering[adj].second;
         int degree_adj = row_ptr[adj+1]-row_ptr[adj];
-        pr_v += pr_adj/degree_adj; // page_rank_of_v <- page_rank_of_v + page_rank_of_neighbor/out_degree_of_neighbor
+        copy_ordering[v].second += alpha*(pr_adj/degree_adj); // page_rank_of_v <- page_rank_of_v + page_rank_of_neighbor/out_degree_of_neighbor
       }
+    }
+    ordering = copy_ordering;
+    for(int v=0; v<num_nodes; v++){
+      float v_value = copy_ordering[v].second * ((1-alpha) / ((num_nodes-1) *alpha));
+      for(int j = 0; j < num_nodes; j++){
+        if(j == v){
+          continue;
+        }
+        ordering[j].second += v_value;
+      } 
     }
   }
 }
-
 
 int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & row_ptr, vector<int> & col_ind){
   ifstream input(fname.c_str());
