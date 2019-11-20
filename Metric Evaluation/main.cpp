@@ -18,6 +18,10 @@ bool ascending(const pair<int,float> & left,const pair<int,float> & right){
   return left.second<right.second;
 }
 
+pair<int,float> add(const float & left,const pair<int,float> & right){
+  return pair<int,float>(right.first, left + right.second);
+}
+
 
 bool isValid(const vector<int> & color_arr,const vector<int>& row_ptr,const vector<int> & col_ind, int num_nodes){
   for(int v=0; v < num_nodes; v++){ // for each node v
@@ -33,7 +37,7 @@ bool isValid(const vector<int> & color_arr,const vector<int>& row_ptr,const vect
 
 
 int graph_coloring(const vector<int> & row_ptr,const vector<int> & col_ind, const vector<pair<int, float> > & ordering, vector<int> & color_arr, int maxdegree, string type){
-  color_arr = vector<int>(ordering.size(), -1);
+  color_arr.resize(ordering.size(), -1);
   int nofcolors=0;
   vector<int> forbid_arr(maxdegree+1, -1);
   for(int i=0; i<ordering.size(); i++){
@@ -59,7 +63,6 @@ int graph_coloring(const vector<int> & row_ptr,const vector<int> & col_ind, cons
   if(!isValid(color_arr, row_ptr, col_ind, ordering.size()) == true){
 			cout << "ERROR" <<endl;
 	}
-
   return nofcolors;
 }
 
@@ -85,7 +88,7 @@ void clustering_coeff(int num_nodes,const vector<int> & row_ptr,const vector<int
         }
     }
     float coeff = possiblelinks != 0 ? (float)noflinks/possiblelinks:0;
-    ordering[v] = pair<int, float>(v, coeff);
+    ordering[v] = make_pair(v, coeff);
   }
 }
 
@@ -122,63 +125,73 @@ void closeness_centrality(int num_nodes,const vector<int> & row_ptr,const vector
     bfs(v, num_nodes, row_ptr, col_ind, dist_arr); // take distance array for node v
     int sum_of_dist = std::accumulate(dist_arr.begin(), dist_arr.end(), 0); // sum of d(v,x) for all x in the graph
     float coeff = sum_of_dist > 0 ? (float)num_nodes/sum_of_dist:0; // if coefficient is negative(meaning that graph is not connected) assign to 0
-    ordering[v] = pair<int,float>(v, coeff);
+    ordering[v] = make_pair(v, coeff);
   }
 }
 
 
 void degree_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering){
-  for(int i=0; i<num_nodes; i++){
-    ordering[i] = pair<int,int>(i,row_ptr[i+1]-row_ptr[i]);
+  for(int v=0; v<num_nodes; v++){
+    ordering[v] = make_pair(v,row_ptr[v+1]-row_ptr[v]);
   }
 }
 
 
-// void page_rank(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering, int iter=100){
-//   for(int i=0; i<num_nodes; i++){ordering[i] = pair<int,float>(i, (float)1/num_nodes);} // initially likelyhoods are uniformly distributed
+void degree_2_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering){
+  int degree_2;
+  for(int v=0; v<num_nodes; v++){
+    degree_2 = 0;
+    for(int edge = row_ptr[v]; edge<row_ptr[v+1]; edge++){
+      int adj = col_ind[edge];
+      degree_2 += row_ptr[adj+1]-row_ptr[adj];
+    }
+    ordering[v] = make_pair(v,degree_2);
+  }
+}
 
-//   for(int i=0; i<iter; i++){ // on each iteration (required for convergence)
-//     for(int v=0; v<num_nodes; v++){ // for each node v
-//       float & pr_v = ordering[v].second; // update page rank of v by looking its in-degree nodes
-//       for(int edge = row_ptr[v]; edge<row_ptr[v+1]; edge++){ // for each in degree neighbor of v (since graph is symmetric in or out degree does not matter)
-//         const int & adj = col_ind[edge];
-//         float & pr_adj = ordering[adj].second;
-//         int degree_adj = row_ptr[adj+1]-row_ptr[adj];
-//         pr_v += pr_adj/degree_adj; // page_rank_of_v <- page_rank_of_v + page_rank_of_neighbor/out_degree_of_neighbor
-//       }
-//     }
-//   }
-// }
+void degree_3_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering){
+  int degree_3;
+  for(int v=0; v<num_nodes; v++){
+    degree_3 = 0;
+    for(int edge = row_ptr[v]; edge<row_ptr[v+1]; edge++){
+      int adj = col_ind[edge];
+      for(int e_adj=row_ptr[adj]; e_adj < row_ptr[adj+1]; e_adj++){
+        int adj_2 = col_ind[e_adj];
+        degree_3 += row_ptr[adj_2+1]-row_ptr[adj_2];
+      }
+    }
+    ordering[v] = make_pair(v,degree_3);
+  }
+}
 
 void page_rank(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering, int iter=100, float alpha = 0.85){
-  for(int i=0; i<num_nodes; i++){ordering[i] = pair<int,float>(i, (float)1/num_nodes);} // initially likelyhoods are uniformly distributed
-  
+  for(int i=0; i<num_nodes; i++){ordering[i] = make_pair(i, (float)1/num_nodes);} // initially likelyhoods are uniformly distributed
+  vector<float> offset(num_nodes, 0.0);
   for(int i=0; i<iter; i++){ // on each iteration (required for convergence)
-    vector<pair<int, float>> copy_ordering(num_nodes, pair<int,float>(0, 0.0));
+    vector<pair<int, float> > copy_ordering(num_nodes, pair<int,float>(0, 0.0));
     for(int j = 0; j < num_nodes; j++){
       copy_ordering[j].first = j;
     }
     for(int v=0; v<num_nodes; v++){ // for each node v
-      float & pr_v = ordering[v].second; // update page rank of v by looking its in-degree nodes
+      // assign total page ranks %85
+      float & pr_v = copy_ordering[v].second; // update page rank of v by looking its in-degree nodes
       for(int edge = row_ptr[v]; edge<row_ptr[v+1]; edge++){ // for each in degree neighbor of v (since graph is symmetric in or out degree does not matter)
         const int & adj = col_ind[edge];
         float & pr_adj = ordering[adj].second;
         int degree_adj = row_ptr[adj+1]-row_ptr[adj];
-        copy_ordering[v].second += alpha*(pr_adj/degree_adj); // page_rank_of_v <- page_rank_of_v + page_rank_of_neighbor/out_degree_of_neighbor
+        pr_v += pr_adj/degree_adj; // page_rank_of_v <- (page_rank_of_v + page_rank_of_neighbor/out_degree_of_neighbor)
       }
+      // distribute %15 evenly
+      float dist_value = pr_v * (1-alpha) / (num_nodes-1);
+      pr_v *= alpha;
+      for_each(offset.begin(), offset.end(), [dist_value](float& d) { d+=dist_value;});
+      pr_v -= dist_value;
     }
-    ordering = copy_ordering;
-    for(int v=0; v<num_nodes; v++){
-      float v_value = copy_ordering[v].second * ((1-alpha) / ((num_nodes-1) *alpha));
-      for(int j = 0; j < num_nodes; j++){
-        if(j == v){
-          continue;
-        }
-        ordering[j].second += v_value;
-      } 
-    }
+    transform(offset.begin(), offset.end(), copy_ordering.begin(), ordering.begin(), add);
+    offset.assign(num_nodes, 0);
   }
 }
+
 
 int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & row_ptr, vector<int> & col_ind){
   ifstream input(fname.c_str());
@@ -192,7 +205,6 @@ int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & ro
   }
   istringstream ss(line);
   ss >> num_nodes >> num_nodes >> num_edges;
-  vector< pair<int,int> > edge_list;
   int v1, v2;
   double weight;
   vector<vector<int>> adj_list(num_nodes);
@@ -253,49 +265,41 @@ int main(int argc, char** argv ){
         }
         // initializations
         vector<pair<int,float> > order(num_nodes);
-        vector<int> color_arr(num_nodes, -1);
+        vector<int> color_arr;
         out << entry->d_name << "," << num_nodes << "," << num_edges << ",";
         // test metrics
         degree_order(num_nodes, row_ptr, col_ind, order);
         sort(order.begin(), order.end(), descending);
         int maxdegree = order[0].second;
+
         out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "descending degree ordering") << ",";
-        color_arr.assign(num_nodes, -1);
 
         sort(order.begin(), order.end(), ascending);
         out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "ascending degree ordering") << ",";
-        color_arr.assign(num_nodes, -1);
 
         random_shuffle(order.begin(), order.end());
         out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "random ordering") << ",";
-        color_arr.assign(num_nodes, -1);
 
         clustering_coeff(num_nodes, row_ptr, col_ind, order);
         sort(order.begin(), order.end(), descending);
         out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "descending clustering coeff ordering") << ",";
-        color_arr.assign(num_nodes, -1);
 
         sort(order.begin(), order.end(), ascending);
         out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "ascending clustering coeff ordering") << ",";
-        color_arr.assign(num_nodes, -1);
 
         closeness_centrality(num_nodes, row_ptr, col_ind, order);
         sort(order.begin(), order.end(), descending);
         out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "descending closeness centrality ordering") << ",";
-        color_arr.assign(num_nodes, -1);
 
         sort(order.begin(), order.end(), ascending);
         out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "ascending closeness centrality ordering") << ",";
-        color_arr.assign(num_nodes, -1);
 
         page_rank(num_nodes, row_ptr, col_ind, order);
         sort(order.begin(), order.end(), descending);
         out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "descending page rank ordering") << ",";
-        color_arr.assign(num_nodes, -1);
 
         sort(order.begin(), order.end(), ascending);
         out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "ascending page rank ordering");
-        color_arr.assign(num_nodes, -1);
         out << endl;
 
       }
