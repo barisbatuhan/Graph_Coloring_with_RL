@@ -135,28 +135,6 @@ void degree_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & 
   }
 }
 
-void second_degree_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
-  for(int i=0; i<num_nodes; i++){
-    unordered_set<int> set;
-    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
-      set.insert(col_ind[j]);
-    }
-    ordering[i] = pair<int,int>(i, set.size());
-  }
-}
-
-void third_degree_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
-  for(int i=0; i<num_nodes; i++){
-    unordered_set<int> set;
-    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
-      for(int k = row_ptr[j]; k < row_ptr[j+1]; k++){
-       set.insert(col_ind[k]);
-      }
-    }
-    ordering[i] = pair<int,int>(i, set.size());
-  }
-}
-
 void degree_2_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering){
   int degree_2;
   for(int v=0; v<num_nodes; v++){
