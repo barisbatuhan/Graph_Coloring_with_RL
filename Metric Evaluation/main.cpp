@@ -25,14 +25,14 @@ pair<int,float> add(const float & left,const pair<int,float> & right){
 
 bool isValid(const vector<int> & color_arr,const vector<int>& row_ptr,const vector<int> & col_ind, int num_nodes){
   for(int v=0; v < num_nodes; v++){ // for each node v
-				for(int e = row_ptr[v]; e < row_ptr[v+1]; e++){
-						const int & adj = col_ind[e]; // for each adjacent of v
-						if(color_arr[adj] == color_arr[v]){ // if color of v equals its adjacent's color
-								return false;
-						}
-				}
+		for(int e = row_ptr[v]; e < row_ptr[v+1]; e++){
+		  const int & adj = col_ind[e]; // for each adjacent of v
+		  if(color_arr[adj] == color_arr[v]){ // if color of v equals its adjacent's color
+        return false;
+		  }
 		}
-		return true;
+	}
+	return true;
 }
 
 
@@ -118,7 +118,6 @@ void bfs(int start_node, int num_nodes, const vector<int> & row_ptr,const vector
   */
 }
 
-
 void closeness_centrality(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering){
   vector<int> dist_arr;
   for(int v=0; v<num_nodes; v++){
@@ -135,30 +134,64 @@ void degree_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & 
   }
 }
 
-void degree_2_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering){
-  int degree_2;
-  for(int v=0; v<num_nodes; v++){
-    degree_2 = 0;
-    for(int edge = row_ptr[v]; edge<row_ptr[v+1]; edge++){
-      int adj = col_ind[edge];
-      degree_2 += row_ptr[adj+1]-row_ptr[adj];
+void degree_2_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+  for(int i=0; i<num_nodes; i++){
+    unordered_set<int> nodes_closer;
+    unordered_set<int> set;
+    // adds all the fist degree nodes to a set
+    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
+      int first_degree = col_ind[j]; 
+      nodes_closer.insert(first_degree);
     }
-    ordering[v] = make_pair(v,degree_2);
+    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
+      int first_degree = col_ind[j]; 
+      // checks all the second degree nodes and if they are not also in 1st 
+      //degree, adds them to the result set
+      for(int k = row_ptr[first_degree]; k < row_ptr[first_degree + 1]; k++) {
+        int node_to_add = col_ind[k];
+        if(nodes_closer.find(node_to_add) != nodes_closer.end()) {
+          continue;
+        } 
+        set.insert(node_to_add);
+      }
+    }
+    ordering[i] = make_pair(i, set.size());
   }
 }
 
-void degree_3_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering){
-  int degree_3;
-  for(int v=0; v<num_nodes; v++){
-    degree_3 = 0;
-    for(int edge = row_ptr[v]; edge<row_ptr[v+1]; edge++){
-      int adj = col_ind[edge];
-      for(int e_adj=row_ptr[adj]; e_adj < row_ptr[adj+1]; e_adj++){
-        int adj_2 = col_ind[e_adj];
-        degree_3 += row_ptr[adj_2+1]-row_ptr[adj_2];
+void degree_3_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+  for(int i=0; i<num_nodes; i++){
+    unordered_set<int> nodes_closer;
+    unordered_set<int> set;
+    // adds all the first degree nodes to the set that holds the nodes closer than
+    // the wanted degree
+    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
+      int first_degree = col_ind[j]; 
+      nodes_closer.insert(first_degree);
+    }
+    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
+      int first_degree = col_ind[j]; 
+      // adds all the second degree nodes to the set that holds the nodes closer than
+      // the wanted degree
+      for(int k = row_ptr[first_degree]; k < row_ptr[first_degree + 1]; k++) {
+        int second_degree = col_ind[k];
+        nodes_closer.insert(second_degree);
+      }
+
+      for(int k = row_ptr[first_degree]; k < row_ptr[first_degree + 1]; k++) {
+        int second_degree = col_ind[k];
+        // checks all the third degree nodes and if they are not also in 1st or 2nd
+        // degree, adds them to the result set
+        for(int t = row_ptr[second_degree]; t < row_ptr[second_degree + 1]; t++) {
+          int node_to_add = col_ind[t];
+          if(nodes_closer.find(node_to_add) != nodes_closer.end()) {
+          continue;
+        } 
+        set.insert(node_to_add);
+        }
       }
     }
-    ordering[v] = make_pair(v,degree_3);
+    ordering[i] = make_pair(i, set.size());
   }
 }
 
@@ -237,13 +270,46 @@ int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & ro
   return 0;
 }
 
+int runAlgorithm(string name, bool isAscending, int num_nodes, const vector<int> & row_ptr, 
+  const vector<int> & col_ind, int maxDegree, int iter=100, float alpha = 0.85) {
+  vector<pair<int, float>> ordering(num_nodes);
+  vector<int> color_arr;
+  int result = 0;
+
+  if(name == "Degree1") {
+    degree_order(num_nodes, row_ptr, col_ind, ordering);
+  } else if(name == "Degree2") {
+    degree_2_order(num_nodes, row_ptr, col_ind, ordering);
+  } else if(name == "Degree3") {
+    degree_3_order(num_nodes, row_ptr, col_ind, ordering);
+  } else if(name == "ClusteringCoeff") {
+    clustering_coeff(num_nodes, row_ptr, col_ind, ordering);
+  } else if(name == "ClosenessCentrality") {
+    closeness_centrality(num_nodes, row_ptr, col_ind, ordering);
+  } else if(name == "PageRank") {
+    page_rank(num_nodes, row_ptr, col_ind, ordering);
+  } else {
+    cerr << "Wrong algorithm name is entered: " << name << endl;
+  }
+  if(isAscending) {
+    sort(ordering.begin(), ordering.end(), ascending);
+    name += " Ascending";
+  } else {
+    sort(ordering.begin(), ordering.end(), descending);
+    name += " Descending";
+  }
+  return graph_coloring(row_ptr, col_ind, ordering, color_arr,  maxDegree, name);
+}
+
 
 int main(int argc, char** argv ){
 
   const char* path = argv[1];
   ofstream out;
   out.open("metric_evaluation1.csv");
-  out << "Graph Name, Num_nodes, Num_edges, DegreeOrderDesc, DegreeOrderAsc, Random, ClusteringCoeffDesc,ClusteringCoeffAsc, ClosenessCentralityDesc, ClosenessCentralityAsc, PageRankDesc, PageRankDesc "<<endl;
+  out << "Graph Name, Num_nodes, Num_edges, DegreeOrderDesc, DegreeOrderAsc, Degree2OrderDesc,  Degree2OrderAsc,  Degree3OrderDesc, Degree3OrderAsc," 
+      << "Random, ClusteringCoeffDesc,ClusteringCoeffAsc, ClosenessCentralityDesc, ClosenessCentralityAsc, PageRankDesc, PageRankDesc "
+      << endl;
 
   DIR *pDIR;
   struct dirent *entry;
@@ -262,59 +328,39 @@ int main(int argc, char** argv ){
           return 0;
         }
         // initializations
-        vector<pair<int,float> > order(num_nodes);
-        vector<int> color_arr;
         out << entry->d_name << "," << num_nodes << "," << num_edges << ",";
-        // test metrics
+        
+        // in order to initialize maxDegree
+        vector<pair<int,float> > order(num_nodes);
         degree_order(num_nodes, row_ptr, col_ind, order);
         sort(order.begin(), order.end(), descending);
-        int maxdegree = order[0].second;
+        int maxDegree = order[0].second;
 
-        out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "descending degree ordering") << ",";
-
-        sort(order.begin(), order.end(), ascending);
-        out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "ascending degree ordering") << ",";
-
+        // for randomization
+        vector<int> color_arr;
         random_shuffle(order.begin(), order.end());
-        out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "random ordering") << ",";
 
-        clustering_coeff(num_nodes, row_ptr, col_ind, order);
-        sort(order.begin(), order.end(), descending);
-        out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "descending clustering coeff ordering") << ",";
+        // test metrics
+        int deg1Desc = runAlgorithm("Degree1", false, num_nodes, row_ptr, col_ind, maxDegree);
+        int deg1Asc = runAlgorithm("Degree1", true, num_nodes, row_ptr, col_ind, maxDegree);
+        int deg2Desc = runAlgorithm("Degree2", false, num_nodes, row_ptr, col_ind, maxDegree);
+        int deg2Asc = runAlgorithm("Degree2", true, num_nodes, row_ptr, col_ind, maxDegree);
+        int deg3Desc = runAlgorithm("Degree3", false, num_nodes, row_ptr, col_ind, maxDegree);
+        int deg3Asc = runAlgorithm("Degree3", true, num_nodes, row_ptr, col_ind, maxDegree);
+        int clusteringCoeffDesc = runAlgorithm("ClusteringCoeff", false, num_nodes, row_ptr, col_ind, maxDegree);
+        int clusteringCoeffAsc = runAlgorithm("ClusteringCoeff", true, num_nodes, row_ptr, col_ind, maxDegree);
+        int closenessCentralityDesc = runAlgorithm("ClosenessCentrality", false, num_nodes, row_ptr, col_ind, maxDegree);
+        int closenessCentralityAsc = runAlgorithm("ClosenessCentrality", true, num_nodes, row_ptr, col_ind, maxDegree);
+        int pageRankDesc = runAlgorithm("PageRank", false, num_nodes, row_ptr, col_ind, maxDegree);
+        int pageRankAsc = runAlgorithm("PageRank", true, num_nodes, row_ptr, col_ind, maxDegree);
+        int random = graph_coloring(row_ptr, col_ind, order, color_arr,  maxDegree, "RandomOrder");
 
-        sort(order.begin(), order.end(), ascending);
-        out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "ascending clustering coeff ordering") << ",";
-
-        closeness_centrality(num_nodes, row_ptr, col_ind, order);
-        sort(order.begin(), order.end(), descending);
-        out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "descending closeness centrality ordering") << ",";
-
-        sort(order.begin(), order.end(), ascending);
-        out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "ascending closeness centrality ordering") << ",";
-
-        page_rank(num_nodes, row_ptr, col_ind, order);
-        sort(order.begin(), order.end(), descending);
-        out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "descending page rank ordering") << ",";
-
-        sort(order.begin(), order.end(), ascending);
-        out << graph_coloring(row_ptr, col_ind, order, color_arr,  maxdegree, "ascending page rank ordering");
-        out << endl;
-
+        out << deg1Desc << "," << deg1Asc << "," << deg2Desc << "," << deg2Asc << "," << deg3Desc << "," << deg3Asc
+            << "," << random << "," << clusteringCoeffDesc << "," << clusteringCoeffAsc << "," 
+            << closenessCentralityDesc << "," << closenessCentralityAsc << "," << pageRankDesc << "," << pageRankAsc << endl;
       }
       closedir(pDIR);
   }
   out.close();
-  /*
-  for(auto & x: order){
-    cout << x.first << " " << x.second <<  endl;
-  }
-  */
-
-  /*
-  for(auto & x: color_arr){
-    cout << x << endl;
-  }
-  */
-
   return 0;
 }
