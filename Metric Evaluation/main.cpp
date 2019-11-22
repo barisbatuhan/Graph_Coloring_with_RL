@@ -143,6 +143,31 @@ void degree_2_order(int num_nodes, const vector<int> & row_ptr, const vector<int
 	}
 }
 
+void degree_two_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+  for(int i=0; i<num_nodes; i++){
+    unordered_set<int> nodes_closer;
+    unordered_set<int> set;
+    // adds all the fist degree nodes to a set
+    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
+      int first_degree = col_ind[j]; 
+      nodes_closer.insert(first_degree);
+    }
+    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
+      int first_degree = col_ind[j]; 
+      // checks all the second degree nodes and if they are not also in 1st 
+      //degree, adds them to the result set
+      for(int k = row_ptr[first_degree]; k < row_ptr[first_degree + 1]; k++) {
+        int node_to_add = col_ind[k];
+        if(nodes_closer.find(node_to_add) != nodes_closer.end()) {
+          continue;
+        } 
+        set.insert(node_to_add);
+      }
+    }
+    ordering[i] = make_pair(i, set.size());
+  }
+}
+
 void degree_3_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
 	vector<int> dist_arr;
 	for (int v = 0; v<num_nodes; v++) {
@@ -238,6 +263,9 @@ int runAlgorithm(string name, bool isAscending, int num_nodes, const vector<int>
 	else if (name == "Degree2") {
 		degree_2_order(num_nodes, row_ptr, col_ind, ordering);
 	}
+  else if (name == "DegreeTwoOld") {
+		degree_two_order(num_nodes, row_ptr, col_ind, ordering);
+	}
 	else if (name == "Degree3") {
 		degree_3_order(num_nodes, row_ptr, col_ind, ordering);
 	}
@@ -260,6 +288,7 @@ int runAlgorithm(string name, bool isAscending, int num_nodes, const vector<int>
 	else {
 		sort(ordering.begin(), ordering.end(), descending);
 		name += " Descending";
+    return -1;
 	}
 	return graph_coloring(row_ptr, col_ind, ordering, color_arr, maxDegree, name);
 }
@@ -321,6 +350,11 @@ int main(int argc, char** argv) {
 			out << deg1Desc << "," << deg1Asc << "," << deg2Desc << "," << deg2Asc << "," << deg3Desc << "," << deg3Asc
 				<< "," << random << "," << clusteringCoeffDesc << "," << clusteringCoeffAsc << ","
 				<< closenessCentralityDesc << "," << closenessCentralityAsc << "," << pageRankDesc << "," << pageRankAsc << endl;
+
+      // to test accuracy of bfs and another approach in degree 2nd
+      // int degTwoDesc = runAlgorithm("DegreeTwoOld", false, num_nodes, row_ptr, col_ind, maxDegree);
+			// int degTwoAsc = runAlgorithm("DegreeTwoOld", true, num_nodes, row_ptr, col_ind, maxDegree);
+      // out << degTwoDesc << "," << degTwoAsc << "," << deg2Desc << "," << deg2Asc << endl;
 		}
 		closedir(pDIR);
 	}

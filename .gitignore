@@ -1,1 +1,4 @@
 .vscode
+*/*.out
+*/*.exe
+*/metric_evaluation1.csv
