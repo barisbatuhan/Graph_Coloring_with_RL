@@ -100,24 +100,32 @@ void bfs(int start_node, int num_nodes, const vector<int> & row_ptr, const vecto
 	queue<int> frontier; // FIFO queue
 	frontier.push(start_node);
 	int dist = 1; // initial distance
-	do {
-		int & front = frontier.front();
-		for (int edge = row_ptr[front]; edge < row_ptr[front + 1]; edge++) { // for each adjacent of front
-			const int & adj = col_ind[edge];
-			if (distance_arr[adj] == -1) { // if it is not visited
-				distance_arr[adj] = dist; // assign corresponding distance
-				frontier.push(adj); // add it to the frontier
+	bool improvement = true;
+	while (improvement && dist <= step_size) {
+		improvement = false;
+		queue<int> new_frontier; // FIFO queue
+		do {
+			int & front = frontier.front();
+			frontier.pop();
+			for (int edge = row_ptr[front]; edge < row_ptr[front + 1]; edge++) { // for each adjacent of front
+				const int & adj = col_ind[edge];
+				if (distance_arr[adj] == -1) { // if it is not visited
+					improvement = true;
+					distance_arr[adj] = dist; // assign corresponding distance
+					new_frontier.push(adj); // add it to the frontier
+				}
 			}
-		}
+		} while (!frontier.empty());
+		frontier = new_frontier;
 		dist++; // next frontier will be further
-		frontier.pop();
-	} while (!frontier.empty() && dist <= step_size);
+	}
 	/*
 	for(auto & x: distance_arr){
 	cout << x << endl;
 	}
 	*/
 }
+
 
 void closeness_centrality(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
 	vector<int> dist_arr;
