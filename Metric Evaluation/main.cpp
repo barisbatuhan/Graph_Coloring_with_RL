@@ -23,7 +23,6 @@ pair<int, float> add(const float & left, const pair<int, float> & right) {
 	return pair<int, float>(right.first, left + right.second);
 }
 
-
 bool isValid(const vector<int> & color_arr, const vector<int>& row_ptr, const vector<int> & col_ind, int num_nodes) {
 	for (int v = 0; v < num_nodes; v++) { // for each node v
 		for (int e = row_ptr[v]; e < row_ptr[v + 1]; e++) {
@@ -36,8 +35,7 @@ bool isValid(const vector<int> & color_arr, const vector<int>& row_ptr, const ve
 	return true;
 }
 
-
-int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, const vector<pair<int, float> > & ordering, vector<int> & color_arr, int maxdegree, string type) {
+int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, const vector<pair<int, float>> & ordering, vector<int> & color_arr, int maxdegree, string type) {
 	color_arr.resize(ordering.size(), -1);
 	int nofcolors = 0;
 	vector<int> forbid_arr(maxdegree + 1, -1);
@@ -67,8 +65,7 @@ int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, con
 	return nofcolors;
 }
 
-
-void clustering_coeff(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+void clustering_coeff(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering) {
 	for (int v = 0; v<num_nodes; v++) { // for each node
 		int degree = row_ptr[v + 1] - row_ptr[v];
 		int possiblelinks = degree*(degree - 1) / 2;
@@ -92,7 +89,6 @@ void clustering_coeff(int num_nodes, const vector<int> & row_ptr, const vector<i
 		ordering[v] = make_pair(v, coeff);
 	}
 }
-
 
 void bfs(int start_node, int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<int> & distance_arr, int step_size = INT_MAX) {
 	distance_arr.assign(num_nodes, -1); // every node is unvisited
@@ -126,8 +122,7 @@ void bfs(int start_node, int num_nodes, const vector<int> & row_ptr, const vecto
 	*/
 }
 
-
-void closeness_centrality(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+void closeness_centrality(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering) {
 	vector<int> dist_arr;
 	for (int v = 0; v<num_nodes; v++) {
 		bfs(v, num_nodes, row_ptr, col_ind, dist_arr); // take distance array for node v
@@ -137,43 +132,18 @@ void closeness_centrality(int num_nodes, const vector<int> & row_ptr, const vect
 	}
 }
 
-void degree_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+void degree_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering) {
 	for (int v = 0; v<num_nodes; v++) {
 		ordering[v] = make_pair(v, row_ptr[v + 1] - row_ptr[v]);
 	}
 }
 
-void degree_2_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+void degree_2_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering) {
 	vector<int> dist_arr;
 	for (int v = 0; v<num_nodes; v++) {
 		bfs(v, num_nodes, row_ptr, col_ind, dist_arr, 2); // take distance array for node v
 		ordering[v] = make_pair(v, count(dist_arr.begin(), dist_arr.end(), 2));
 	}
-}
-
-void degree_two_order(int num_nodes,const vector<int> & row_ptr,const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
-  for(int i=0; i<num_nodes; i++){
-    unordered_set<int> nodes_closer;
-    unordered_set<int> set;
-    // adds all the fist degree nodes to a set
-    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
-      int first_degree = col_ind[j]; 
-      nodes_closer.insert(first_degree);
-    }
-    for(int j = row_ptr[i]; j < row_ptr[i+1]; j++){
-      int first_degree = col_ind[j]; 
-      // checks all the second degree nodes and if they are not also in 1st 
-      //degree, adds them to the result set
-      for(int k = row_ptr[first_degree]; k < row_ptr[first_degree + 1]; k++) {
-        int node_to_add = col_ind[k];
-        if(nodes_closer.find(node_to_add) != nodes_closer.end()) {
-          continue;
-        } 
-        set.insert(node_to_add);
-      }
-    }
-    ordering[i] = make_pair(i, set.size());
-  }
 }
 
 void degree_3_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
@@ -184,7 +154,7 @@ void degree_3_order(int num_nodes, const vector<int> & row_ptr, const vector<int
 	}
 }
 
-void page_rank(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering, int iter = 100, float alpha = 0.85) {
+void page_rank(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering, int iter = 100, float alpha = 0.85) {
 	for (int i = 0; i<num_nodes; i++) { ordering[i] = make_pair(i, (float)1 / num_nodes); } // initially likelyhoods are uniformly distributed
 	vector<float> offset(num_nodes, 0.0);
 	for (int i = 0; i<iter; i++) { // on each iteration (required for convergence)
@@ -211,7 +181,6 @@ void page_rank(int num_nodes, const vector<int> & row_ptr, const vector<int> & c
 		offset.assign(num_nodes, 0);
 	}
 }
-
 
 int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & row_ptr, vector<int> & col_ind) {
 	ifstream input(fname.c_str());
@@ -267,36 +236,26 @@ int runAlgorithm(string name, bool isAscending, int num_nodes, const vector<int>
 
 	if (name == "Degree1") {
 		degree_order(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "Degree2") {
+	} else if (name == "Degree2") {
 		degree_2_order(num_nodes, row_ptr, col_ind, ordering);
-	}
-  else if (name == "DegreeTwoOld") {
-		degree_two_order(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "Degree3") {
+	} else if (name == "Degree3") {
 		degree_3_order(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "ClusteringCoeff") {
+	} else if (name == "ClusteringCoeff") {
 		clustering_coeff(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "ClosenessCentrality") {
+	} else if (name == "ClosenessCentrality") {
 		closeness_centrality(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "PageRank") {
+	} else if (name == "PageRank") {
 		page_rank(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else {
+	} else {
 		cerr << "Wrong algorithm name is entered: " << name << endl;
+    return -1;
 	}
 	if (isAscending) {
 		sort(ordering.begin(), ordering.end(), ascending);
 		name += " Ascending";
-	}
-	else {
+	} else {
 		sort(ordering.begin(), ordering.end(), descending);
 		name += " Descending";
-    return -1;
 	}
 	return graph_coloring(row_ptr, col_ind, ordering, color_arr, maxDegree, name);
 }
@@ -358,12 +317,7 @@ int main(int argc, char** argv) {
 			out << deg1Desc << "," << deg1Asc << "," << deg2Desc << "," << deg2Asc << "," << deg3Desc << "," << deg3Asc
 				<< "," << random << "," << clusteringCoeffDesc << "," << clusteringCoeffAsc << ","
 				<< closenessCentralityDesc << "," << closenessCentralityAsc << "," << pageRankDesc << "," << pageRankAsc << endl;
-
-      // to test accuracy of bfs and another approach in degree 2nd
-      // int degTwoDesc = runAlgorithm("DegreeTwoOld", false, num_nodes, row_ptr, col_ind, maxDegree);
-			// int degTwoAsc = runAlgorithm("DegreeTwoOld", true, num_nodes, row_ptr, col_ind, maxDegree);
-      // out << degTwoDesc << "," << degTwoAsc << "," << deg2Desc << "," << deg2Asc << endl;
-		}
+    }
 		closedir(pDIR);
 	}
 	out.close();
