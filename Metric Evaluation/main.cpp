@@ -196,6 +196,11 @@ int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & ro
 	ss >> num_nodes >> num_nodes >> num_edges;
 	int v1, v2;
 	double weight;
+
+    vector<int> renameArr(num_nodes, -1);
+    int counter = 0;
+	bool eliminateUnused = true;
+
 	vector<vector<int> > adj_list(num_nodes);
 	for (int i = 0; i<num_edges; i++) {
 		getline(input, line);
@@ -203,11 +208,32 @@ int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & ro
 		inp >> v1 >> v2;
 		v1--; // make it 0 based
 		v2--;
+
+		//for detecting vetices that are unused
+        if(renameArr[v1] == -1 && eliminateUnused) {
+            renameArr[v1] = counter;
+            v1 = counter;
+            counter++;
+        } else if(eliminateUnused){
+            v1 = renameArr[v1];
+        }
+        if(renameArr[v2] == -1 && eliminateUnused) {
+            renameArr[v2] = counter;
+            v2 = counter;
+            counter++;
+        } else if(eliminateUnused) {
+            v2 = renameArr[v2];
+        }
+
 		if (v1 != v2) {
 			adj_list[v1].push_back(v2); // add the edge v1->v2
 			adj_list[v2].push_back(v1); // add the edge v2->v1
 		}
 	}
+	if(eliminateUnused) {
+		num_nodes = counter;
+	}
+	
 	row_ptr = vector<int>(num_nodes + 1);
 	col_ind = vector<int>(2 * num_edges);
 	row_ptr[0] = 0;
