@@ -39,9 +39,11 @@ int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, con
 	color_arr.resize(ordering.size(), -1);
 	int nofcolors = 0;
 	vector<int> forbid_arr(maxdegree + 1, -1);
+	bool hasEdge = false;
 	for (int i = 0; i<ordering.size(); i++) {
 		const int & node = ordering[i].first; //for each node in ordering
 		for (int edge = row_ptr[node]; edge < row_ptr[node + 1]; edge++) {
+			hasEdge = true;
 			const int & adj = col_ind[edge];//for each adjacent node
 			if (color_arr[adj] != -1) { // if it is already colored
 				forbid_arr[color_arr[adj]] = node; // that color is forbidden to node
@@ -57,7 +59,9 @@ int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, con
 			}
 		}
 	}
-	nofcolors++;
+	if (hasEdge) {
+		nofcolors++;
+	}
 	cout << "with " << type << " nof colors: " << nofcolors << endl;
 	if (!isValid(color_arr, row_ptr, col_ind, ordering.size()) == true) {
 		cout << "ERROR" << endl;
@@ -197,8 +201,8 @@ int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & ro
 	int v1, v2;
 	double weight;
 
-    vector<int> renameArr(num_nodes, -1);
-    int counter = 0;
+	vector<int> renameArr(num_nodes, -1);
+	int counter = 0;
 	bool eliminateUnused = true;
 
 	vector<vector<int> > adj_list(num_nodes);
@@ -210,30 +214,32 @@ int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & ro
 		v2--;
 
 		//for detecting vetices that are unused
-        if(renameArr[v1] == -1 && eliminateUnused) {
-            renameArr[v1] = counter;
-            v1 = counter;
-            counter++;
-        } else if(eliminateUnused){
-            v1 = renameArr[v1];
-        }
-        if(renameArr[v2] == -1 && eliminateUnused) {
-            renameArr[v2] = counter;
-            v2 = counter;
-            counter++;
-        } else if(eliminateUnused) {
-            v2 = renameArr[v2];
-        }
+		if (renameArr[v1] == -1 && eliminateUnused) {
+			renameArr[v1] = counter;
+			v1 = counter;
+			counter++;
+		}
+		else if (eliminateUnused) {
+			v1 = renameArr[v1];
+		}
+		if (renameArr[v2] == -1 && eliminateUnused) {
+			renameArr[v2] = counter;
+			v2 = counter;
+			counter++;
+		}
+		else if (eliminateUnused) {
+			v2 = renameArr[v2];
+		}
 
 		if (v1 != v2) {
 			adj_list[v1].push_back(v2); // add the edge v1->v2
 			adj_list[v2].push_back(v1); // add the edge v2->v1
 		}
 	}
-	if(eliminateUnused) {
+	if (eliminateUnused) {
 		num_nodes = counter;
 	}
-	
+
 	row_ptr = vector<int>(num_nodes + 1);
 	col_ind = vector<int>(2 * num_edges);
 	row_ptr[0] = 0;
@@ -262,24 +268,31 @@ int runAlgorithm(string name, bool isAscending, int num_nodes, const vector<int>
 
 	if (name == "Degree1") {
 		degree_order(num_nodes, row_ptr, col_ind, ordering);
-	} else if (name == "Degree2") {
+	}
+	else if (name == "Degree2") {
 		degree_2_order(num_nodes, row_ptr, col_ind, ordering);
-	} else if (name == "Degree3") {
+	}
+	else if (name == "Degree3") {
 		degree_3_order(num_nodes, row_ptr, col_ind, ordering);
-	} else if (name == "ClusteringCoeff") {
+	}
+	else if (name == "ClusteringCoeff") {
 		clustering_coeff(num_nodes, row_ptr, col_ind, ordering);
-	} else if (name == "ClosenessCentrality") {
+	}
+	else if (name == "ClosenessCentrality") {
 		closeness_centrality(num_nodes, row_ptr, col_ind, ordering);
-	} else if (name == "PageRank") {
+	}
+	else if (name == "PageRank") {
 		page_rank(num_nodes, row_ptr, col_ind, ordering);
-	} else {
+	}
+	else {
 		cerr << "Wrong algorithm name is entered: " << name << endl;
-    return -1;
+		return -1;
 	}
 	if (isAscending) {
 		sort(ordering.begin(), ordering.end(), ascending);
 		name += " Ascending";
-	} else {
+	}
+	else {
 		sort(ordering.begin(), ordering.end(), descending);
 		name += " Descending";
 	}
@@ -343,7 +356,7 @@ int main(int argc, char** argv) {
 			out << deg1Desc << "," << deg1Asc << "," << deg2Desc << "," << deg2Asc << "," << deg3Desc << "," << deg3Asc
 				<< "," << random << "," << clusteringCoeffDesc << "," << clusteringCoeffAsc << ","
 				<< closenessCentralityDesc << "," << closenessCentralityAsc << "," << pageRankDesc << "," << pageRankAsc << endl;
-    }
+		}
 		closedir(pDIR);
 	}
 	out.close();
