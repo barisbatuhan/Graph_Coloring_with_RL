@@ -19,6 +19,13 @@ bool ascending(const pair<int, float> & left, const pair<int, float> & right) {
 	return left.second<right.second;
 }
 
+bool descendingFirst(const pair<int, float> & left, const pair<int, float> & right) {
+	return left.first>right.first;
+}
+bool ascendingFirst(const pair<int, float> & left, const pair<int, float> & right) {
+	return left.first<right.first;
+}
+
 pair<int, float> add(const float & left, const pair<int, float> & right) {
 	return pair<int, float>(right.first, left + right.second);
 }
@@ -300,9 +307,8 @@ int runAlgorithm(string name, bool isAscending, int num_nodes, const vector<int>
 }
 
 
-int main(int argc, char** argv) {
+void findDifferentOrderings(const char* path) {
 
-	const char* path = argv[1];
 	ofstream out;
 	out.open("metric_evaluation1.csv");
 	out << "Graph Name, Num_nodes, Num_edges, DegreeOrderDesc, DegreeOrderAsc, Degree2OrderDesc,  Degree2OrderAsc,  Degree3OrderDesc, Degree3OrderAsc,"
@@ -312,6 +318,7 @@ int main(int argc, char** argv) {
 	DIR *pDIR;
 	struct dirent *entry;
 	if (pDIR = opendir(path)) {
+
 		while (entry = readdir(pDIR)) {
 			cout << entry->d_name << endl;
 			string fname = path + ((string)entry->d_name);
@@ -323,7 +330,7 @@ int main(int argc, char** argv) {
 			vector<int> row_ptr, col_ind;
 			if (read_graph(fname, num_nodes, num_edges, row_ptr, col_ind) == -1) {
 				cerr << "error reading graph" << endl;
-				return 0;
+				return;
 			}
 			// initializations
 			out << entry->d_name << "," << num_nodes << "," << num_edges << ",";
@@ -356,9 +363,130 @@ int main(int argc, char** argv) {
 			out << deg1Desc << "," << deg1Asc << "," << deg2Desc << "," << deg2Asc << "," << deg3Desc << "," << deg3Asc
 				<< "," << random << "," << clusteringCoeffDesc << "," << clusteringCoeffAsc << ","
 				<< closenessCentralityDesc << "," << closenessCentralityAsc << "," << pageRankDesc << "," << pageRankAsc << endl;
-		}
+    	}
 		closedir(pDIR);
 	}
 	out.close();
+}
+
+/** The order of the arguments in the weightList has to be as follows:
+ * 1 - Order 1 weight
+ * 2 - Order 2 weight
+ * 3 - Order 3 weight
+ * 4 - Clustering Coefficient weight
+ * 5 - Closeness Centrality weight
+ * 6 - Page Rank weight
+ * 
+ *  !!! if you want using directly the weights that are given to you, then pass second parameter as NULL
+*/
+void findWeightedAnalysis(const char* path, const char* csvPath, long totalOptimal, vector<float> weightList = vector<float>(6, 0.0)) {
+
+	if(csvPath != NULL) {
+		// weights 
+		long totalDeg1 = 0, totalDeg2 = 0, totalDeg3 = 0, totalClusCoeff = 0, totalClosenessCentrality = 0, totalPageRank = 0;
+
+		// get Order Colorings from the csv file created
+		ifstream input(csvPath);
+		if (input.fail()) {
+			cerr << "The csv path is not correct!!" << endl;
+			return;
+		}
+	
+		// read graph
+		string line = "";
+
+		// discard first row since it includes labels
+		getline(input, line);
+		// read other rows
+		while(getline(input, line)) {
+			istringstream subInput(line);
+			int counter = 0;
+			string element;
+			while(getline(subInput, element, ',')){
+				if(counter == 3) totalDeg1 += stoi(element);
+				else if(counter == 5) totalDeg2 += stoi(element);
+				else if(counter == 7) totalDeg3 += stoi(element);
+				else if(counter == 9) totalClusCoeff += stoi(element);
+				else if(counter == 11) totalClosenessCentrality += stoi(element);
+				else if(counter == 13) totalPageRank += stoi(element);
+				counter++;
+			}
+		}
+		// weight calculation
+		weightList[0] = (float) totalOptimal / totalDeg1;
+		weightList[1] = (float) totalOptimal / totalDeg2;
+		weightList[2] = (float) totalOptimal / totalDeg3;
+		weightList[3] = (float) totalOptimal / totalClusCoeff;
+		weightList[4] = (float) totalOptimal / totalClosenessCentrality;
+		weightList[5] = (float) totalOptimal / totalPageRank;
+	}
+
+	ofstream out;
+	out.open("weighted_metric1.csv");
+	out << "Graph Name, Num_nodes, Num_edges, WeightedResult" << endl;
+
+	DIR *pDIR;
+	struct dirent *entry;
+	if (pDIR = opendir(path)) {
+		while (entry = readdir(pDIR)) {
+			cout << entry->d_name << endl;
+			string fname = path + ((string)entry->d_name);
+			if (fname.at(fname.length() - 1) == '.') {
+				continue;
+			}
+			cout << fname << endl;
+			int num_nodes, num_edges;
+			vector<int> row_ptr, col_ind;
+			if (read_graph(fname, num_nodes, num_edges, row_ptr, col_ind) == -1) {
+				cerr << "error reading graph" << endl;
+				return;
+			}
+			// initializations
+			out << entry->d_name << "," << num_nodes << "," << num_edges << ",";
+
+			// getting orders for each algorithm
+			vector<pair<int, float>> deg1Order(num_nodes);
+			degree_order(num_nodes, row_ptr, col_ind, deg1Order);
+			sort(deg1Order.begin(), deg1Order.end(), ascendingFirst);
+			vector<pair<int, float>> deg2Order(num_nodes);
+			degree_2_order(num_nodes, row_ptr, col_ind, deg2Order);
+			sort(deg2Order.begin(), deg2Order.end(), ascendingFirst);
+			vector<pair<int, float>> deg3Order(num_nodes);
+			degree_3_order(num_nodes, row_ptr, col_ind, deg3Order);
+			sort(deg3Order.begin(), deg3Order.end(), ascendingFirst);
+			vector<pair<int, float>> clussCoeffOrder(num_nodes);
+			clustering_coeff(num_nodes, row_ptr, col_ind, clussCoeffOrder);
+			sort(clussCoeffOrder.begin(), clussCoeffOrder.end(), ascendingFirst);
+			vector<pair<int, float>> closenessCentralityOrder(num_nodes);
+			closeness_centrality(num_nodes, row_ptr, col_ind, closenessCentralityOrder);
+			sort(closenessCentralityOrder.begin(), closenessCentralityOrder.end(), ascendingFirst);
+			vector<pair<int, float>> pageRankOrder(num_nodes);
+			page_rank(num_nodes, row_ptr, col_ind, pageRankOrder);
+			sort(pageRankOrder.begin(), pageRankOrder.end(), ascendingFirst);
+			
+			vector<pair<int, float>> finalOrder(num_nodes);
+			for(int i = 0; i < num_nodes; i++) {
+				float value = deg1Order[i].second * weightList[0] + deg2Order[i].second * weightList[1] 
+							+ deg3Order[i].second * weightList[2] + clussCoeffOrder[i].second * weightList[3] 
+							+ closenessCentralityOrder[i].second * weightList[4] + pageRankOrder[i].second * weightList[5];
+				
+				finalOrder[i]= make_pair(i, value);
+			}
+			vector<int> color_arr;
+			sort(deg1Order.begin(), deg1Order.end(), descending);
+			int maxDegree = deg1Order[0].second;
+
+			sort(finalOrder.begin(), finalOrder.end(), descending);
+			int result = graph_coloring(row_ptr, col_ind, finalOrder, color_arr, maxDegree, "Weighted Result");
+			out << result << endl;
+    	}
+		closedir(pDIR);
+	}
+	out.close();
+}
+
+int main(int argc, char** argv) {
+	// findDifferentOrderings(argv[1]);
+	findWeightedAnalysis(argv[1], "./ordering_greedy_results.csv", 1347);
 	return 0;
 }
