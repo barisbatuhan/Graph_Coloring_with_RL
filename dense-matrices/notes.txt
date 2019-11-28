@@ -1,7 +1,0 @@
-NOTES ABOUT THE GRAPHS HERE
----------------------------------------------------------------------
-
-* These graphs are the ones, whose size is bigger than expected to
-run integer programming algorithm. 
-
-* Maybe greedy algorithms can be run on these graphs.
