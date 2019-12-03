@@ -285,6 +285,8 @@ void normalize(vector<vector <pair<int, float> > > & orders){
 
 int main(int argc, char** argv) {
 
+	int totalRegression = 0;
+	vector<float> regressionParams = {0.15, 0.0, 0.1, 0.05, 0.7, 0.0};
 	const char* path = argv[1];
 	ofstream out;
 	out.open("metric_evaluation1.csv");
@@ -329,7 +331,7 @@ int main(int argc, char** argv) {
 			normalize(order);
 
 			for(int i=0; i<num_nodes; i++){
-				order[6][i] = make_pair<int, float>((int)i, (float)(0.15f*order[0][i].second + 0.1f*order[2][i].second + 0.05f * order[3][i].second + 0.7f*order[4][i].second));
+				order[6][i] = make_pair<int, float>((int)i, (float)(regressionParams[0]*order[0][i].second + regressionParams[1]*order[1][i].second + regressionParams[2]*order[2][i].second + regressionParams[3] * order[3][i].second + regressionParams[4]*order[4][i].second + regressionParams[5]*order[5][i].second));
 				order[7][i] = order[0][i];
 			}
 			vector<vector<int> > color_arr(8);
@@ -356,11 +358,14 @@ int main(int argc, char** argv) {
 			int regressionDesc = graph_coloring(row_ptr, col_ind, order[6], color_arr[6], maxDegree);
 			int random = graph_coloring(row_ptr, col_ind, order[7], color_arr[7], maxDegree);
 
+			totalRegression += regressionDesc;
+
 			out << deg1Desc << "," << deg2Desc << "," << deg3Desc << "," << random << "," << clusteringCoeffDesc << "," << closenessCentralityDesc << "," << pageRankDesc << "," << regressionDesc << endl;
 			cout << deg1Desc << "," << deg2Desc << "," << deg3Desc << "," << random << "," << clusteringCoeffDesc << "," << closenessCentralityDesc << "," << pageRankDesc << "," << regressionDesc << endl;
 		}
 		closedir(pDIR);
 	}
 	out.close();
+	cout << "In total: " << totalRegression << endl;
 	return 0;
 }

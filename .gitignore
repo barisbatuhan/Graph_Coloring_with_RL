@@ -1,4 +1,14 @@
+# IDE related files:
 .vscode
+
+# Executables
 */*.out
 */*.exe
+*/*/*.exe
+*/*/*.out
+
+# Trial results
 */metric_evaluation1.csv
+
+# Caches:
+*/*/*.gch

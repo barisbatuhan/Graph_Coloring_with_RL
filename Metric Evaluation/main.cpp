@@ -383,8 +383,13 @@ void findWeightedAnalysis(const char* path, const char* csvPath, long totalOptim
 
 	if(csvPath != NULL) {
 		// weights 
-		long totalDeg1 = 0, totalDeg2 = 0, totalDeg3 = 0, totalClusCoeff = 0, totalClosenessCentrality = 0, totalPageRank = 0;
-
+		float totalDeg1 = 0, totalDeg2 = 0, totalDeg3 = 0, totalClusCoeff = 0, totalClosenessCentrality = 0, totalPageRank = 0;
+		float maxd1 = -99999.9999, mind1 = 99999.99999;
+		float maxd2 = -99999.9999, mind2 = 99999.99999;
+		float maxd3 = -99999.9999, mind3 = 99999.99999;
+		float maxclc = -99999.9999, minclc = 99999.99999;
+		float maxcc = -99999.9999, mincc = 99999.99999;
+		float maxpr = -99999.9999, minpr = 99999.99999;
 		// get Order Colorings from the csv file created
 		ifstream input(csvPath);
 		if (input.fail()) {
@@ -403,15 +408,40 @@ void findWeightedAnalysis(const char* path, const char* csvPath, long totalOptim
 			int counter = 0;
 			string element;
 			while(getline(subInput, element, ',')){
-				if(counter == 3) totalDeg1 += stoi(element);
-				else if(counter == 5) totalDeg2 += stoi(element);
-				else if(counter == 7) totalDeg3 += stoi(element);
-				else if(counter == 9) totalClusCoeff += stoi(element);
-				else if(counter == 11) totalClosenessCentrality += stoi(element);
-				else if(counter == 13) totalPageRank += stoi(element);
+				if(counter == 3) {
+					totalDeg1 += stoi(element);
+					if(stoi(element) > maxd1) maxd1 = stoi(element);
+					if(stoi(element) < mind1) mind1 = stoi(element);
+				} else if(counter == 5) {
+					totalDeg2 += stoi(element);
+					if(stoi(element) > maxd2) maxd2 = stoi(element);
+					if(stoi(element) < mind2) mind2 = stoi(element);
+				} else if(counter == 7) {
+					totalDeg3 += stoi(element);
+					if(stoi(element) > maxd3) maxd3 = stoi(element);
+					if(stoi(element) < mind3) mind3 = stoi(element);
+				} else if(counter == 9) {
+					totalClusCoeff += stoi(element);
+					if(stoi(element) > maxclc) maxclc = stoi(element);
+					if(stoi(element) < minclc) minclc = stoi(element);
+				} else if(counter == 11){
+					totalClosenessCentrality += stoi(element);
+					if(stoi(element) > maxcc) maxcc = stoi(element);
+					if(stoi(element) < mincc) mincc = stoi(element);
+				} else if(counter == 13){
+					totalPageRank += stoi(element);
+					if(stoi(element) > maxpr) maxpr = stoi(element);
+					if(stoi(element) < minpr) minpr = stoi(element);
+				} 
 				counter++;
 			}
 		}
+		// totalDeg1 = (totalDeg1 - mind1) /(maxd1 - mind1);
+		// totalDeg2 = (totalDeg2 - mind2) /(maxd2 - mind2);
+		// totalDeg3 = (totalDeg3 - mind3) /(maxd3 - mind3);
+		// totalClusCoeff = (totalClusCoeff - minclc) /(maxclc - minclc);
+		// totalClosenessCentrality = (totalClosenessCentrality - mincc) /(maxcc - mincc);
+		// totalPageRank = (totalPageRank - minpr) /(maxpr - minpr);
 		// weight calculation
 		weightList[0] = (float) totalOptimal / totalDeg1;
 		weightList[1] = (float) totalOptimal / totalDeg2;
@@ -419,6 +449,7 @@ void findWeightedAnalysis(const char* path, const char* csvPath, long totalOptim
 		weightList[3] = (float) totalOptimal / totalClusCoeff;
 		weightList[4] = (float) totalOptimal / totalClosenessCentrality;
 		weightList[5] = (float) totalOptimal / totalPageRank;
+		cout << weightList[0] << " - " <<  weightList[1] << " - " << weightList[2] << " - " << weightList[3] << " - " << weightList[4] << " - " << weightList[5] <<endl;
 	}
 
 	ofstream out;
@@ -428,6 +459,8 @@ void findWeightedAnalysis(const char* path, const char* csvPath, long totalOptim
 	DIR *pDIR;
 	struct dirent *entry;
 	if (pDIR = opendir(path)) {
+		int totalColor = 0;
+		float numForEqualMaxMin = 0.0;
 		while (entry = readdir(pDIR)) {
 			cout << entry->d_name << endl;
 			string fname = path + ((string)entry->d_name);
@@ -447,40 +480,91 @@ void findWeightedAnalysis(const char* path, const char* csvPath, long totalOptim
 			// getting orders for each algorithm
 			vector<pair<int, float>> deg1Order(num_nodes);
 			degree_order(num_nodes, row_ptr, col_ind, deg1Order);
-			sort(deg1Order.begin(), deg1Order.end(), ascendingFirst);
-			vector<pair<int, float>> deg2Order(num_nodes);
-			degree_2_order(num_nodes, row_ptr, col_ind, deg2Order);
-			sort(deg2Order.begin(), deg2Order.end(), ascendingFirst);
-			vector<pair<int, float>> deg3Order(num_nodes);
-			degree_3_order(num_nodes, row_ptr, col_ind, deg3Order);
-			sort(deg3Order.begin(), deg3Order.end(), ascendingFirst);
-			vector<pair<int, float>> clussCoeffOrder(num_nodes);
-			clustering_coeff(num_nodes, row_ptr, col_ind, clussCoeffOrder);
-			sort(clussCoeffOrder.begin(), clussCoeffOrder.end(), ascendingFirst);
-			vector<pair<int, float>> closenessCentralityOrder(num_nodes);
-			closeness_centrality(num_nodes, row_ptr, col_ind, closenessCentralityOrder);
-			sort(closenessCentralityOrder.begin(), closenessCentralityOrder.end(), ascendingFirst);
-			vector<pair<int, float>> pageRankOrder(num_nodes);
-			page_rank(num_nodes, row_ptr, col_ind, pageRankOrder);
-			sort(pageRankOrder.begin(), pageRankOrder.end(), ascendingFirst);
-			
-			vector<pair<int, float>> finalOrder(num_nodes);
-			for(int i = 0; i < num_nodes; i++) {
-				float value = deg1Order[i].second * weightList[0] + deg2Order[i].second * weightList[1] 
-							+ deg3Order[i].second * weightList[2] + clussCoeffOrder[i].second * weightList[3] 
-							+ closenessCentralityOrder[i].second * weightList[4] + pageRankOrder[i].second * weightList[5];
-				
-				finalOrder[i]= make_pair(i, value);
-			}
-			vector<int> color_arr;
 			sort(deg1Order.begin(), deg1Order.end(), descending);
 			int maxDegree = deg1Order[0].second;
+			float max = deg1Order[0].second;
+			float min = deg1Order[deg1Order.size() - 1].second;
+			for(int i = 0; i < deg1Order.size(); i++) {
+				if(max == min) {
+					deg1Order[i].second = numForEqualMaxMin;
+				} else {
+					deg1Order[i].second = (float) (deg1Order[i].second - min) / (max - min);
+				}	
+			}
+			sort(deg1Order.begin(), deg1Order.end(), ascendingFirst);
+	
+			vector<pair<int, float>> deg2Order(num_nodes);
+			degree_2_order(num_nodes, row_ptr, col_ind, deg2Order);
+			sort(deg2Order.begin(), deg2Order.end(), descending);
+			max = deg2Order[0].second;
+			min = deg2Order[deg2Order.size() - 1].second;
+			for(int i = 0; i < deg2Order.size(); i++) {
+				if(max == min) deg2Order[i].second = numForEqualMaxMin;
+				else deg2Order[i].second = (deg2Order[i].second - min) / (max - min);	
+			}
+			sort(deg2Order.begin(), deg2Order.end(), ascendingFirst);
 
+			vector<pair<int, float>> deg3Order(num_nodes);
+			degree_3_order(num_nodes, row_ptr, col_ind, deg3Order);
+			sort(deg3Order.begin(), deg3Order.end(), descending);
+			max = deg3Order[0].second;
+			min = deg3Order[deg3Order.size() - 1].second;
+			for(int i = 0; i < deg3Order.size(); i++) {
+				if(max == min) deg3Order[i].second = numForEqualMaxMin;
+				else deg3Order[i].second = (deg3Order[i].second - min) / (max - min);	
+			}
+			sort(deg3Order.begin(), deg3Order.end(), ascendingFirst);
+
+			vector<pair<int, float>> clussCoeffOrder(num_nodes);
+			clustering_coeff(num_nodes, row_ptr, col_ind, clussCoeffOrder);
+			sort(clussCoeffOrder.begin(), clussCoeffOrder.end(), descending);
+			max = clussCoeffOrder[0].second;
+			min = clussCoeffOrder[clussCoeffOrder.size() - 1].second;
+			for(int i = 0; i < clussCoeffOrder.size(); i++) {
+				if(max == min) clussCoeffOrder[i].second = numForEqualMaxMin;
+				else clussCoeffOrder[i].second = (clussCoeffOrder[i].second - min) / (max - min);	
+			}
+			sort(clussCoeffOrder.begin(), clussCoeffOrder.end(), ascendingFirst);
+
+			vector<pair<int, float>> closenessCentralityOrder(num_nodes);
+			closeness_centrality(num_nodes, row_ptr, col_ind, closenessCentralityOrder);
+			sort(closenessCentralityOrder.begin(), closenessCentralityOrder.end(), descending);
+			max = closenessCentralityOrder[0].second;
+			min = closenessCentralityOrder[closenessCentralityOrder.size() - 1].second;
+			for(int i = 0; i < closenessCentralityOrder.size(); i++) {
+				if(max == min) closenessCentralityOrder[i].second = numForEqualMaxMin;
+				else closenessCentralityOrder[i].second = (closenessCentralityOrder[i].second - min) / (max - min);	
+			}
+			sort(closenessCentralityOrder.begin(), closenessCentralityOrder.end(), ascendingFirst);
+
+			vector<pair<int, float>> pageRankOrder(num_nodes);
+			page_rank(num_nodes, row_ptr, col_ind, pageRankOrder);
+			sort(pageRankOrder.begin(), pageRankOrder.end(), descending);
+			max = pageRankOrder[0].second;
+			min = pageRankOrder[pageRankOrder.size() - 1].second;
+			for(int i = 0; i < pageRankOrder.size(); i++) {
+				if(max == min) pageRankOrder[i].second = numForEqualMaxMin;
+				else pageRankOrder[i].second = (pageRankOrder[i].second - min) / (max - min);	
+			}
+			sort(pageRankOrder.begin(), pageRankOrder.end(), ascendingFirst);
+					
+			vector<pair<int, float>> finalOrder(num_nodes);
+			for(int i = 0; i < num_nodes; i++) {
+				float value = (float) (deg1Order[i].second * weightList[0] + deg2Order[i].second * weightList[1] 
+							+ deg3Order[i].second * weightList[2] + clussCoeffOrder[i].second * weightList[3] 
+							+ closenessCentralityOrder[i].second * weightList[4] + pageRankOrder[i].second * weightList[5]);
+				finalOrder[i]= make_pair(i, value);
+				// cout << "Value: " << finalOrder[i].second << " - Node: " << finalOrder[i].first << endl;
+			}
+			
+			vector<int> color_arr;
 			sort(finalOrder.begin(), finalOrder.end(), descending);
 			int result = graph_coloring(row_ptr, col_ind, finalOrder, color_arr, maxDegree, "Weighted Result");
 			out << result << endl;
+			totalColor += result;
     	}
 		closedir(pDIR);
+		cout << "Total result is: " << totalColor << endl;
 	}
 	out.close();
 }
@@ -488,5 +572,6 @@ void findWeightedAnalysis(const char* path, const char* csvPath, long totalOptim
 int main(int argc, char** argv) {
 	// findDifferentOrderings(argv[1]);
 	findWeightedAnalysis(argv[1], "./ordering_greedy_results.csv", 1347);
+	// findWeightedAnalysis(argv[1], NULL, 1347, {0.15, 0, 0.1, 0.7, 0.05, 0});
 	return 0;
 }
