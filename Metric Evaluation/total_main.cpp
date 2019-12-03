@@ -286,7 +286,11 @@ void normalize(vector<vector <pair<int, float> > > & orders){
 int main(int argc, char** argv) {
 
 	int totalRegression = 0;
+	// best version:
 	vector<float> regressionParams = {0.15, 0.0, 0.1, 0.05, 0.7, 0.0};
+	// for other trials:
+	// vector<float> regressionParams = {0.636879, 0.599466, 0.585907, 0.568834, 0.610054, 0.541399};
+
 	const char* path = argv[1];
 	ofstream out;
 	out.open("metric_evaluation1.csv");

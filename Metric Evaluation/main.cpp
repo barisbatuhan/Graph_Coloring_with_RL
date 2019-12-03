@@ -449,7 +449,7 @@ void findWeightedAnalysis(const char* path, const char* csvPath, long totalOptim
 		weightList[3] = (float) totalOptimal / totalClusCoeff;
 		weightList[4] = (float) totalOptimal / totalClosenessCentrality;
 		weightList[5] = (float) totalOptimal / totalPageRank;
-		cout << weightList[0] << " - " <<  weightList[1] << " - " << weightList[2] << " - " << weightList[3] << " - " << weightList[4] << " - " << weightList[5] <<endl;
+		cout << weightList[0] << ", " <<  weightList[1] << ", " << weightList[2] << ", " << weightList[3] << ", " << weightList[4] << ", " << weightList[5] <<endl;
 	}
 
 	ofstream out;
