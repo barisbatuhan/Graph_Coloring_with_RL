@@ -20,7 +20,6 @@ class UGraph {
         UGraph(string, vector<pair<int, int>> &, bool, bool);
 		UGraph();
 		UGraph(const UGraph&);
-		UGraph& operator=(const UGraph&);
         
         // getters
         int getNodeSize() const;
@@ -126,15 +125,6 @@ void UGraph::printRowPtr() {
 	for(int i = 0; i < rowPtr.size(); i++) {
 		cout << rowPtr[i] << " - ";
 	}
-}
-
-// operator overloading
-UGraph& UGraph::operator=(const UGraph& other) {
-	graphName = other.getGraphName();
-	numOfNodes = other.getNodeSize();
-	numOfEdges = other.getEdgeSize();
-	rowPtr = other.getRowPtr();
-	colInd = other.getColInd();
 }
 
 #endif
