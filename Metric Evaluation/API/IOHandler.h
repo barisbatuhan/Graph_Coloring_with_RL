@@ -6,11 +6,33 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include<dirent.h>
 using namespace std;
 
 class IOHandler {
     public:
       
+        static vector<string> readAllMtxInDir(string path) {
+            vector<string> filenames;
+            try {
+                DIR *pDIR;
+	            struct dirent *entry;
+	            if (pDIR = opendir(path.c_str())) {
+	            	while (entry = readdir(pDIR)) {
+	            		string fname = (string) entry->d_name;
+	            		if (fname.find(".mtx") == string::npos) {
+	            			continue;
+	            		} else {
+                            filenames.push_back(fname);
+                        }
+                    }
+                }
+                return filenames;
+            } catch (char* arg) {
+                return filenames;
+            }
+        }
+
         static bool readSuiteSparseMtx(string path, vector<pair<int, int>> & lines) {
             cout << path << endl;
             ifstream input(path.c_str());

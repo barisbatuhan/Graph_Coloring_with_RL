@@ -92,38 +92,43 @@ void Orderer::clusteringCoefficient(vector<pair<int, float>> & ordering) {
 		float coeff = noflinks != 0 ? (float)possiblelinks / noflinks : possiblelinks+1;
 		ordering[v] = make_pair(v, coeff);
 	}
+	sort(ordering.begin(), ordering.end(), descendingSecond);
 }
 
 void Orderer::closenessCentrality(vector<pair<int, float>> & ordering) {
-	vector<int> dist_arr;
+	vector<int> distArr;
 	for (int v = 0; v<numOfNodes; v++) {
-		bfs(v, dist_arr); // take distance array for node v
-		int sum_of_dist = accumulate(dist_arr.begin(), dist_arr.end(), 0); // sum of d(v,x) for all x in the graph
+		bfs(v, distArr); // take distance array for node v
+		int sum_of_dist = accumulate(distArr.begin(), distArr.end(), 0); // sum of d(v,x) for all x in the graph
 		float coeff = sum_of_dist > 0 ? (float)numOfNodes / sum_of_dist : 0; // if coefficient is negative(meaning that graph is not connected) assign to 0
 		ordering[v] = make_pair(v, coeff);
 	}
+	sort(ordering.begin(), ordering.end(), descendingSecond);
 }
 
 void Orderer::degreeOrder(vector<pair<int, float>> & ordering) {
 	for (int v = 0; v<numOfNodes; v++) {
 		ordering[v] = make_pair(v, rowPtr[v + 1] - rowPtr[v]);
 	}
+	sort(ordering.begin(), ordering.end(), descendingSecond);
 }
 
 void Orderer::degree2Order(vector<pair<int, float>> & ordering) {
-	vector<int> dist_arr;
+	vector<int> distArr;
 	for (int v = 0; v<numOfNodes; v++) {
-		bfs(v, dist_arr, 2); // take distance array for node v
-		ordering[v] = make_pair(v, count(dist_arr.begin(), dist_arr.end(), 2));
+		bfs(v, distArr, 2); // take distance array for node v
+		ordering[v] = make_pair(v, count(distArr.begin(), distArr.end(), 2));
 	}
+	sort(ordering.begin(), ordering.end(), descendingSecond);
 }
 
 void Orderer::degree3Order(vector<pair<int, float> > & ordering) {
-	vector<int> dist_arr;
+	vector<int> distArr;
 	for (int v = 0; v<numOfNodes; v++) {
-		bfs(v, dist_arr, 3); // take distance array for node v
-		ordering[v] = make_pair(v, count(dist_arr.begin(), dist_arr.end(), 3));
+		bfs(v, distArr, 3); // take distance array for node v
+		ordering[v] = make_pair(v, count(distArr.begin(), distArr.end(), 3));
 	}
+	sort(ordering.begin(), ordering.end(), descendingSecond);
 }
 
 void Orderer::pageRank(vector<pair<int, float>> & ordering, int iter, float alpha) {
@@ -152,6 +157,7 @@ void Orderer::pageRank(vector<pair<int, float>> & ordering, int iter, float alph
 		transform(offset.begin(), offset.end(), copy_ordering.begin(), ordering.begin(), add);
 		offset.assign(numOfNodes, 0);
 	}
+	sort(ordering.begin(), ordering.end(), descendingSecond);
 }
 
 void Orderer::weightedAnalysis(vector<pair<int, float>>& ordering, vector<float> weights) {
@@ -174,6 +180,7 @@ void Orderer::weightedAnalysis(vector<pair<int, float>>& ordering, vector<float>
 					+ orders[2][i].second * weights[2] + orders[3][i].second * weights[3] 
 					+ orders[4][i].second * weights[4] + orders[5][i].second * weights[5]);
 	}
+	sort(ordering.begin(), ordering.end(), descendingSecond);
 }
 
 // helper functions
