@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
         orderer.clusteringCoefficient(orders[3]);
         orderer.closenessCentrality(orders[4]);
         orderer.pageRank(orders[5]);
-        orderer.weightedAnalysis(orders[6], {0.15, 0.0, 0.1, 0.7, 0.05, 0});
+        orderer.weightedAnalysis(orders[6], {0.15, 0.0, 0.1, 0.05, 0.7, 0.0});
 
         // gets the max degree for coloring and colors
         int maxDegree = orders[0][0].second;
