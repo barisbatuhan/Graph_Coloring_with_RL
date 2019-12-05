@@ -67,11 +67,11 @@ int main(int argc, char** argv) {
     cout << endl
         << "Degree 1        : " << totalColors[0] << endl
         << "Degree 2        : " << totalColors[1] << endl
-        << "Degree 3        : " << totalColors[0] << endl
-        << "ClusCoeff       : " << totalColors[1] << endl
-        << "ClosenessCent   : " << totalColors[0] << endl
-        << "PageRank        : " << totalColors[1] << endl
-        << "Weighted        : " << totalColors[0] << endl
+        << "Degree 3        : " << totalColors[2] << endl
+        << "ClusCoeff       : " << totalColors[3] << endl
+        << "ClosenessCent   : " << totalColors[4] << endl
+        << "PageRank        : " << totalColors[5] << endl
+        << "Weighted        : " << totalColors[6] << endl
         << "Optimal         : " << 1347 << endl;
     
     return 0;
