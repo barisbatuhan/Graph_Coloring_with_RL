@@ -11,6 +11,7 @@ class Colorer {
         Colorer(UGraph &);
         // paints the graph greedily according to given order
         int colorGreedily(vector<pair<int, float>> &, int);
+		int dist2ColorGreedily(vector<pair<int, float>> &, int);
 
     private:
         vector<int> rowPtr;
@@ -69,17 +70,17 @@ int Colorer::dist2ColorGreedily(vector<pair<int, float>> & ordering, int maxDegr
 	bool hasEdge = false;
 	for (int i = 0; i<ordering.size(); i++) {
 		const int & node = ordering[i].first; //for each node in ordering
-		for (int edge = row_ptr[node]; edge < row_ptr[node + 1]; edge++) {
+		for (int edge = rowPtr[node]; edge < rowPtr[node + 1]; edge++) {
 			hasEdge = true;
-			const int & adj = col_ind[edge];//for each adjacent node
-			for (int edge_2 = row_ptr[adj]; edge_2 < row_ptr[adj + 1]; edge_2++) {
-				const int & adj_neigh = col_ind[edge_2];
+			const int & adj = colInd[edge];//for each adjacent node
+			for (int edge_2 = rowPtr[adj]; edge_2 < rowPtr[adj + 1]; edge_2++) {
+				const int & adj_neigh = colInd[edge_2];
 				if (color_arr[adj_neigh] != -1) { // if it is already colored
 					forbid_arr[color_arr[adj_neigh]] = node; // that color is forbidden to node
 				}
 			}
 		}
-		for (int color = 0; color < maxdegree; color++) { // greedily choose the smallest possible color
+		for (int color = 0; color < maxDegree; color++) { // greedily choose the smallest possible color
 			if (forbid_arr[color] != node) {
 				color_arr[node] = color;
 				if (nofcolors < color) {
