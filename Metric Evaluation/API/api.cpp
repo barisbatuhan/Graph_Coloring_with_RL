@@ -8,7 +8,7 @@ using namespace std;
 
 /**
  * In order to run the code:
- * g++ api.cpp UGraph.h Orderer.h IOHandler.h Colorer.h
+ * g++ api.cpp UGraph.h Orderer.h IOHandler.h Colorer.h -O3
  * In linux     : ./a.out ../../matrices/
  * In Windows   : .\a.exe ..\..\matrices\
  */
@@ -18,9 +18,9 @@ int main(int argc, char** argv) {
     string path = string(argv[1]);
     // reading the directory matrix files
     vector<string> filenames = IOHandler::readAllMtxInDir(path);
-    vector<int> totalColors(7, 0);
+    vector<int> totalColors(8, 0);
     
-    cout << "Graph,Degree1,Degree2,Degree3,ClusteringCoeff,ClosenessCentrality,PageRank,WeightedAnalysis" << endl;
+    cout << "Graph,Degree1,Degree2,Degree3,ClusteringCoeff,ClosenessCentrality,PageRank,WeightedAnalysis,RecoloringOfWeighted" << endl;
 
     for(int i = 0; i < filenames.size(); i++) {
         
@@ -56,22 +56,33 @@ int main(int argc, char** argv) {
         totalColors[4] += closenessCentralityColors;
         int pageRankColors = colorer.colorGreedily(orders[5], maxDegree);
         totalColors[5] += pageRankColors;
-        int weightedAnalysisColors = colorer.colorGreedily(orders[6], maxDegree);
+        // int weightedAnalysisColors = colorer.colorGreedily(orders[6], maxDegree);
+        // totalColors[6] += weightedAnalysisColors;
+        vector<int> weightedColorArr = colorer.colorGreedilyNodes(orders[6], maxDegree);
+        int weightedAnalysisColors = weightedColorArr[weightedColorArr.size()-1];
         totalColors[6] += weightedAnalysisColors;
+
+        // recoloring of weighted 
+        weightedColorArr.pop_back();
+        int recoloringColors = colorer.recolorGreedily(weightedColorArr, weightedAnalysisColors);
+        totalColors[7] += recoloringColors;
 
         cout << filenames[i] << "," << deg1Colors << "," << deg2Colors << "," << deg3Colors << "," 
              << clusteringCoefficientColors << "," << closenessCentralityColors << "," << pageRankColors 
-             << "," << weightedAnalysisColors << endl;
+             << "," << weightedAnalysisColors  << "," << recoloringColors << endl;
     }
 
     cout << endl
-        << "Degree 1        : " << totalColors[0] << endl
-        << "Degree 2        : " << totalColors[1] << endl
-        << "Degree 3        : " << totalColors[2] << endl
-        << "ClusCoeff       : " << totalColors[3] << endl
-        << "ClosenessCent   : " << totalColors[4] << endl
-        << "PageRank        : " << totalColors[5] << endl
-        << "Weighted        : " << totalColors[6] << endl
+        << "Algorithm       | Total # of Colors | Ratio" << endl
+
+        << "Degree 1        : " << totalColors[0] << " \t\t" << (float) totalColors[0] / 1347 << endl
+        << "Degree 2        : " << totalColors[1] << " \t\t" << (float) totalColors[1] / 1347 << endl
+        << "Degree 3        : " << totalColors[2] << " \t\t" << (float) totalColors[2] / 1347 << endl
+        << "ClusCoeff       : " << totalColors[3] << " \t\t" << (float) totalColors[3] / 1347 << endl
+        << "ClosenessCent   : " << totalColors[4] << " \t\t" << (float) totalColors[4] / 1347 << endl
+        << "PageRank        : " << totalColors[5] << " \t\t" << (float) totalColors[5] / 1347 << endl
+        << "Weighted        : " << totalColors[6] << " \t\t" << (float) totalColors[6] / 1347 << endl
+        << "Recolored Wei.  : " << totalColors[7] << " \t\t" << (float) totalColors[7] / 1347 << endl
         << "Optimal         : " << 1347 << endl;
     
     return 0;
