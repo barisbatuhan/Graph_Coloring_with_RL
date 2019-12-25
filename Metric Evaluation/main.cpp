@@ -9,6 +9,9 @@
 #include <string>
 #include<dirent.h>
 #include <climits>
+#include <cmath>
+#include <omp.h>
+#include <map>
 
 using namespace std;
 
@@ -17,13 +20,6 @@ bool descending(const pair<int, float> & left, const pair<int, float> & right) {
 }
 bool ascending(const pair<int, float> & left, const pair<int, float> & right) {
 	return left.second<right.second;
-}
-
-bool descendingFirst(const pair<int, float> & left, const pair<int, float> & right) {
-	return left.first>right.first;
-}
-bool ascendingFirst(const pair<int, float> & left, const pair<int, float> & right) {
-	return left.first<right.first;
 }
 
 pair<int, float> add(const float & left, const pair<int, float> & right) {
@@ -42,10 +38,11 @@ bool isValid(const vector<int> & color_arr, const vector<int>& row_ptr, const ve
 	return true;
 }
 
-int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, const vector<pair<int, float>> & ordering, vector<int> & color_arr, int maxdegree, string type) {
+
+int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering, vector<int> & color_arr, int maxdegree) {
 	color_arr.resize(ordering.size(), -1);
 	int nofcolors = 0;
-	vector<int> forbid_arr(maxdegree + 1, -1);
+	vector<int> forbid_arr(row_ptr.size()-1, -1);
 	bool hasEdge = false;
 	for (int i = 0; i<ordering.size(); i++) {
 		const int & node = ordering[i].first; //for each node in ordering
@@ -55,6 +52,12 @@ int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, con
 			if (color_arr[adj] != -1) { // if it is already colored
 				forbid_arr[color_arr[adj]] = node; // that color is forbidden to node
 			}
+      /*for(int edge_2 = row_ptr[adj]; edge_2 < row_ptr[adj+1]; edge_2++){
+        const int & adj_neigh = col_ind[edge_2];
+        if (color_arr[adj_neigh] != -1) { // if it is already colored
+  				forbid_arr[color_arr[adj_neigh]] = node; // that color is forbidden to node
+  			}
+      }*/
 		}
 		for (int color = 0; color < maxdegree; color++) { // greedily choose the smallest possible color
 			if (forbid_arr[color] != node) {
@@ -66,17 +69,18 @@ int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, con
 			}
 		}
 	}
-	if (hasEdge) {
+	if(hasEdge){
 		nofcolors++;
 	}
-	cout << "with " << type << " nof colors: " << nofcolors << endl;
-	if (!isValid(color_arr, row_ptr, col_ind, ordering.size()) == true) {
+	/*if (!isValid(color_arr, row_ptr, col_ind, ordering.size()) == true) {
 		cout << "ERROR" << endl;
-	}
+	}*/
 	return nofcolors;
 }
 
-void clustering_coeff(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering) {
+void clustering_coeff(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+	omp_set_num_threads(32);
+	#pragma omp parallel for num_threads(32)
 	for (int v = 0; v<num_nodes; v++) { // for each node
 		int degree = row_ptr[v + 1] - row_ptr[v];
 		int possiblelinks = degree*(degree - 1) / 2;
@@ -86,7 +90,6 @@ void clustering_coeff(int num_nodes, const vector<int> & row_ptr, const vector<i
 			int adj = col_ind[edge];
 			set.insert(adj);
 		}
-
 		for (int edge = row_ptr[v]; edge < row_ptr[v + 1]; edge++) {
 			const int & adj = col_ind[edge]; // for each neighbor of v
 			for (int link = row_ptr[adj]; link < row_ptr[adj + 1]; link++) {
@@ -96,7 +99,7 @@ void clustering_coeff(int num_nodes, const vector<int> & row_ptr, const vector<i
 				}
 			}
 		}
-		float coeff = possiblelinks != 0 ? (float)noflinks / possiblelinks : 0;
+		float coeff = noflinks != 0 ? (float)possiblelinks / noflinks : possiblelinks+1;
 		ordering[v] = make_pair(v, coeff);
 	}
 }
@@ -112,7 +115,7 @@ void bfs(int start_node, int num_nodes, const vector<int> & row_ptr, const vecto
 		improvement = false;
 		queue<int> new_frontier; // FIFO queue
 		do {
-			int & front = frontier.front();
+			int front = frontier.front();
 			frontier.pop();
 			for (int edge = row_ptr[front]; edge < row_ptr[front + 1]; edge++) { // for each adjacent of front
 				const int & adj = col_ind[edge];
@@ -133,7 +136,27 @@ void bfs(int start_node, int num_nodes, const vector<int> & row_ptr, const vecto
 	*/
 }
 
-void closeness_centrality(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering) {
+void closeness_centrality_approx(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering, int size = 10000) {
+	vector<vector<int> > dist_arr(size, vector<int>(num_nodes));
+	omp_set_num_threads(32);
+	#pragma omp parallel for num_threads(32)
+	for (int v = 0; v<size; v++) {
+		bfs(v, num_nodes, row_ptr, col_ind, dist_arr[v]); // take distance array for node v
+	}
+	#pragma omp barrier
+
+	#pragma omp parallel for num_threads(32)
+	for(int v=0; v<num_nodes; v++){
+		int sum_of_dist = 0;
+		for(int i = 0; i<size; i++){
+			sum_of_dist += dist_arr[i][v];
+		}
+		float coeff = sum_of_dist > 0 ? (float)size / sum_of_dist : 0; // if coefficient is negative(meaning that graph is not connected) assign to 0
+		ordering[v] = make_pair(v, coeff);
+	}
+}
+
+void closeness_centrality(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
 	vector<int> dist_arr;
 	for (int v = 0; v<num_nodes; v++) {
 		bfs(v, num_nodes, row_ptr, col_ind, dist_arr); // take distance array for node v
@@ -143,29 +166,36 @@ void closeness_centrality(int num_nodes, const vector<int> & row_ptr, const vect
 	}
 }
 
-void degree_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering) {
+
+void degree_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+	omp_set_num_threads(32);
+	#pragma omp parallel for num_threads(32)
 	for (int v = 0; v<num_nodes; v++) {
 		ordering[v] = make_pair(v, row_ptr[v + 1] - row_ptr[v]);
 	}
 }
 
-void degree_2_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering) {
-	vector<int> dist_arr;
+void degree_2_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
+	omp_set_num_threads(32);
+	#pragma omp parallel for num_threads(32)
 	for (int v = 0; v<num_nodes; v++) {
+		vector<int> dist_arr(num_nodes);
 		bfs(v, num_nodes, row_ptr, col_ind, dist_arr, 2); // take distance array for node v
 		ordering[v] = make_pair(v, count(dist_arr.begin(), dist_arr.end(), 2));
 	}
 }
 
 void degree_3_order(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering) {
-	vector<int> dist_arr;
+	omp_set_num_threads(32);
+	#pragma omp parallel for num_threads(32)
 	for (int v = 0; v<num_nodes; v++) {
+		vector<int> dist_arr(num_nodes);
 		bfs(v, num_nodes, row_ptr, col_ind, dist_arr, 3); // take distance array for node v
 		ordering[v] = make_pair(v, count(dist_arr.begin(), dist_arr.end(), 3));
 	}
 }
 
-void page_rank(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & ordering, int iter = 100, float alpha = 0.85) {
+void page_rank(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering, int iter = 20, float alpha = 0.85) {
 	for (int i = 0; i<num_nodes; i++) { ordering[i] = make_pair(i, (float)1 / num_nodes); } // initially likelyhoods are uniformly distributed
 	vector<float> offset(num_nodes, 0.0);
 	for (int i = 0; i<iter; i++) { // on each iteration (required for convergence)
@@ -193,7 +223,7 @@ void page_rank(int num_nodes, const vector<int> & row_ptr, const vector<int> & c
 	}
 }
 
-int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & row_ptr, vector<int> & col_ind) {
+int read_graphs(string & fname, int & num_nodes, int &num_edges, vector<int> & row_ptr, vector<int> & col_ind, vector<pair<vector<int>, vector<int> > > &graphs) {
 	ifstream input(fname.c_str());
 	if (input.fail()) {
 		return -1;
@@ -208,8 +238,8 @@ int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & ro
 	int v1, v2;
 	double weight;
 
-	vector<int> renameArr(num_nodes, -1);
-	int counter = 0;
+    vector<int> renameArr(num_nodes, -1);
+    int counter = 0;
 	bool eliminateUnused = true;
 
 	vector<vector<int> > adj_list(num_nodes);
@@ -221,29 +251,27 @@ int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & ro
 		v2--;
 
 		//for detecting vetices that are unused
-		if (renameArr[v1] == -1 && eliminateUnused) {
-			renameArr[v1] = counter;
-			v1 = counter;
-			counter++;
-		}
-		else if (eliminateUnused) {
-			v1 = renameArr[v1];
-		}
-		if (renameArr[v2] == -1 && eliminateUnused) {
-			renameArr[v2] = counter;
-			v2 = counter;
-			counter++;
-		}
-		else if (eliminateUnused) {
-			v2 = renameArr[v2];
-		}
+    if(renameArr[v1] == -1 && eliminateUnused) {
+        renameArr[v1] = counter;
+        v1 = counter;
+        counter++;
+    } else if(eliminateUnused){
+        v1 = renameArr[v1];
+    }
+    if(renameArr[v2] == -1 && eliminateUnused) {
+        renameArr[v2] = counter;
+        v2 = counter;
+        counter++;
+    } else if(eliminateUnused) {
+        v2 = renameArr[v2];
+    }
 
 		if (v1 != v2) {
 			adj_list[v1].push_back(v2); // add the edge v1->v2
 			adj_list[v2].push_back(v1); // add the edge v2->v1
 		}
 	}
-	if (eliminateUnused) {
+	if(eliminateUnused) {
 		num_nodes = counter;
 	}
 
@@ -261,317 +289,210 @@ int read_graph(string & fname, int & num_nodes, int &num_edges, vector<int> & ro
 	for (int v = 1; v<num_nodes + 1; v++) {  // cumulative sum
 		row_ptr[v] += row_ptr[v - 1];
 	}
-	cout << "nof nodes " << num_nodes << endl;
-	cout << "nof edges " << num_edges << endl;
-
+	//cout << "nof nodes " << num_nodes << endl;
+	//cout << "nof edges " << num_edges << endl;
+	pair<vector<int>, vector<int> > graph = make_pair(row_ptr, col_ind);
+	graphs.push_back(graph);
 	return 0;
 }
 
-int runAlgorithm(string name, bool isAscending, int num_nodes, const vector<int> & row_ptr,
-	const vector<int> & col_ind, int maxDegree, int iter = 100, float alpha = 0.85) {
-	vector<pair<int, float> > ordering(num_nodes);
-	vector<int> color_arr;
-	int result = 0;
-
-	if (name == "Degree1") {
-		degree_order(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "Degree2") {
-		degree_2_order(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "Degree3") {
-		degree_3_order(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "ClusteringCoeff") {
-		clustering_coeff(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "ClosenessCentrality") {
-		closeness_centrality(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else if (name == "PageRank") {
-		page_rank(num_nodes, row_ptr, col_ind, ordering);
-	}
-	else {
-		cerr << "Wrong algorithm name is entered: " << name << endl;
-		return -1;
-	}
-	if (isAscending) {
-		sort(ordering.begin(), ordering.end(), ascending);
-		name += " Ascending";
-	}
-	else {
-		sort(ordering.begin(), ordering.end(), descending);
-		name += " Descending";
-	}
-	return graph_coloring(row_ptr, col_ind, ordering, color_arr, maxDegree, name);
+void normal_params(vector <pair<int, float> > & order, float & mean, float & stdev){
+	float sum = 0;
+	float sq_sum = 0;
+  for(auto & x: order) {
+     sum += x.second;
+     sq_sum += x.second * x.second;
+  }
+  mean = sum / order.size();
+  stdev = sqrt(sq_sum / order.size() - mean * mean);
 }
 
 
-void findDifferentOrderings(const char* path) {
-
-	ofstream out;
-	out.open("metric_evaluation1.csv");
-	out << "Graph Name, Num_nodes, Num_edges, DegreeOrderDesc, DegreeOrderAsc, Degree2OrderDesc,  Degree2OrderAsc,  Degree3OrderDesc, Degree3OrderAsc,"
-		<< "Random, ClusteringCoeffDesc,ClusteringCoeffAsc, ClosenessCentralityDesc, ClosenessCentralityAsc, PageRankDesc, PageRankDesc "
-		<< endl;
-
-	DIR *pDIR;
-	struct dirent *entry;
-	if (pDIR = opendir(path)) {
-
-		while (entry = readdir(pDIR)) {
-			cout << entry->d_name << endl;
-			string fname = path + ((string)entry->d_name);
-			if (fname.at(fname.length() - 1) == '.') {
-				continue;
-			}
-			cout << fname << endl;
-			int num_nodes, num_edges;
-			vector<int> row_ptr, col_ind;
-			if (read_graph(fname, num_nodes, num_edges, row_ptr, col_ind) == -1) {
-				cerr << "error reading graph" << endl;
-				return;
-			}
-			// initializations
-			out << entry->d_name << "," << num_nodes << "," << num_edges << ",";
-
-			// in order to initialize maxDegree
-			vector<pair<int, float> > order(num_nodes);
-			degree_order(num_nodes, row_ptr, col_ind, order);
-			sort(order.begin(), order.end(), descending);
-			int maxDegree = order[0].second;
-
-			// for randomization
-			vector<int> color_arr;
-			random_shuffle(order.begin(), order.end());
-
-			// test metrics
-			int deg1Desc = runAlgorithm("Degree1", false, num_nodes, row_ptr, col_ind, maxDegree);
-			int deg1Asc = runAlgorithm("Degree1", true, num_nodes, row_ptr, col_ind, maxDegree);
-			int deg2Desc = runAlgorithm("Degree2", false, num_nodes, row_ptr, col_ind, maxDegree);
-			int deg2Asc = runAlgorithm("Degree2", true, num_nodes, row_ptr, col_ind, maxDegree);
-			int deg3Desc = runAlgorithm("Degree3", false, num_nodes, row_ptr, col_ind, maxDegree);
-			int deg3Asc = runAlgorithm("Degree3", true, num_nodes, row_ptr, col_ind, maxDegree);
-			int clusteringCoeffDesc = runAlgorithm("ClusteringCoeff", false, num_nodes, row_ptr, col_ind, maxDegree);
-			int clusteringCoeffAsc = runAlgorithm("ClusteringCoeff", true, num_nodes, row_ptr, col_ind, maxDegree);
-			int closenessCentralityDesc = runAlgorithm("ClosenessCentrality", false, num_nodes, row_ptr, col_ind, maxDegree);
-			int closenessCentralityAsc = runAlgorithm("ClosenessCentrality", true, num_nodes, row_ptr, col_ind, maxDegree);
-			int pageRankDesc = runAlgorithm("PageRank", false, num_nodes, row_ptr, col_ind, maxDegree);
-			int pageRankAsc = runAlgorithm("PageRank", true, num_nodes, row_ptr, col_ind, maxDegree);
-			int random = graph_coloring(row_ptr, col_ind, order, color_arr, maxDegree, "RandomOrder");
-
-			out << deg1Desc << "," << deg1Asc << "," << deg2Desc << "," << deg2Asc << "," << deg3Desc << "," << deg3Asc
-				<< "," << random << "," << clusteringCoeffDesc << "," << clusteringCoeffAsc << ","
-				<< closenessCentralityDesc << "," << closenessCentralityAsc << "," << pageRankDesc << "," << pageRankAsc << endl;
-    	}
-		closedir(pDIR);
-	}
-	out.close();
-}
-
-/** The order of the arguments in the weightList has to be as follows:
- * 1 - Order 1 weight
- * 2 - Order 2 weight
- * 3 - Order 3 weight
- * 4 - Clustering Coefficient weight
- * 5 - Closeness Centrality weight
- * 6 - Page Rank weight
- * 
- *  !!! if you want using directly the weights that are given to you, then pass second parameter as NULL
-*/
-void findWeightedAnalysis(const char* path, const char* csvPath, long totalOptimal, vector<float> weightList = vector<float>(6, 0.0)) {
-
-	if(csvPath != NULL) {
-		// weights 
-		float totalDeg1 = 0, totalDeg2 = 0, totalDeg3 = 0, totalClusCoeff = 0, totalClosenessCentrality = 0, totalPageRank = 0;
-		float maxd1 = -99999.9999, mind1 = 99999.99999;
-		float maxd2 = -99999.9999, mind2 = 99999.99999;
-		float maxd3 = -99999.9999, mind3 = 99999.99999;
-		float maxclc = -99999.9999, minclc = 99999.99999;
-		float maxcc = -99999.9999, mincc = 99999.99999;
-		float maxpr = -99999.9999, minpr = 99999.99999;
-		// get Order Colorings from the csv file created
-		ifstream input(csvPath);
-		if (input.fail()) {
-			cerr << "The csv path is not correct!!" << endl;
-			return;
+void normalize(vector<vector <pair<int, float> > > & orders){
+	float mean, stdev;
+	for(auto & order: orders){
+		normal_params(order, mean, stdev);
+		if(stdev==0){
+			stdev = 1;
 		}
-	
-		// read graph
-		string line = "";
-
-		// discard first row since it includes labels
-		getline(input, line);
-		// read other rows
-		while(getline(input, line)) {
-			istringstream subInput(line);
-			int counter = 0;
-			string element;
-			while(getline(subInput, element, ',')){
-				if(counter == 3) {
-					totalDeg1 += stoi(element);
-					if(stoi(element) > maxd1) maxd1 = stoi(element);
-					if(stoi(element) < mind1) mind1 = stoi(element);
-				} else if(counter == 5) {
-					totalDeg2 += stoi(element);
-					if(stoi(element) > maxd2) maxd2 = stoi(element);
-					if(stoi(element) < mind2) mind2 = stoi(element);
-				} else if(counter == 7) {
-					totalDeg3 += stoi(element);
-					if(stoi(element) > maxd3) maxd3 = stoi(element);
-					if(stoi(element) < mind3) mind3 = stoi(element);
-				} else if(counter == 9) {
-					totalClusCoeff += stoi(element);
-					if(stoi(element) > maxclc) maxclc = stoi(element);
-					if(stoi(element) < minclc) minclc = stoi(element);
-				} else if(counter == 11){
-					totalClosenessCentrality += stoi(element);
-					if(stoi(element) > maxcc) maxcc = stoi(element);
-					if(stoi(element) < mincc) mincc = stoi(element);
-				} else if(counter == 13){
-					totalPageRank += stoi(element);
-					if(stoi(element) > maxpr) maxpr = stoi(element);
-					if(stoi(element) < minpr) minpr = stoi(element);
-				} 
-				counter++;
-			}
-		}
-		// totalDeg1 = (totalDeg1 - mind1) /(maxd1 - mind1);
-		// totalDeg2 = (totalDeg2 - mind2) /(maxd2 - mind2);
-		// totalDeg3 = (totalDeg3 - mind3) /(maxd3 - mind3);
-		// totalClusCoeff = (totalClusCoeff - minclc) /(maxclc - minclc);
-		// totalClosenessCentrality = (totalClosenessCentrality - mincc) /(maxcc - mincc);
-		// totalPageRank = (totalPageRank - minpr) /(maxpr - minpr);
-		// weight calculation
-		weightList[0] = (float) totalOptimal / totalDeg1;
-		weightList[1] = (float) totalOptimal / totalDeg2;
-		weightList[2] = (float) totalOptimal / totalDeg3;
-		weightList[3] = (float) totalOptimal / totalClusCoeff;
-		weightList[4] = (float) totalOptimal / totalClosenessCentrality;
-		weightList[5] = (float) totalOptimal / totalPageRank;
-		cout << weightList[0] << ", " <<  weightList[1] << ", " << weightList[2] << ", " << weightList[3] << ", " << weightList[4] << ", " << weightList[5] <<endl;
+		for_each(order.begin(), order.end(), [mean, stdev](pair<int, float> & x){ x.second = (x.second-mean)/stdev;});
 	}
-
-	ofstream out;
-	out.open("weighted_metric1.csv");
-	out << "Graph Name, Num_nodes, Num_edges, WeightedResult" << endl;
-
-	DIR *pDIR;
-	struct dirent *entry;
-	if (pDIR = opendir(path)) {
-		int totalColor = 0;
-		float numForEqualMaxMin = 0.0;
-		while (entry = readdir(pDIR)) {
-			cout << entry->d_name << endl;
-			string fname = path + ((string)entry->d_name);
-			if (fname.at(fname.length() - 1) == '.') {
-				continue;
-			}
-			cout << fname << endl;
-			int num_nodes, num_edges;
-			vector<int> row_ptr, col_ind;
-			if (read_graph(fname, num_nodes, num_edges, row_ptr, col_ind) == -1) {
-				cerr << "error reading graph" << endl;
-				return;
-			}
-			// initializations
-			out << entry->d_name << "," << num_nodes << "," << num_edges << ",";
-
-			// getting orders for each algorithm
-			vector<pair<int, float>> deg1Order(num_nodes);
-			degree_order(num_nodes, row_ptr, col_ind, deg1Order);
-			sort(deg1Order.begin(), deg1Order.end(), descending);
-			int maxDegree = deg1Order[0].second;
-			float max = deg1Order[0].second;
-			float min = deg1Order[deg1Order.size() - 1].second;
-			for(int i = 0; i < deg1Order.size(); i++) {
-				if(max == min) {
-					deg1Order[i].second = numForEqualMaxMin;
-				} else {
-					deg1Order[i].second = (float) (deg1Order[i].second - min) / (max - min);
-				}	
-			}
-			sort(deg1Order.begin(), deg1Order.end(), ascendingFirst);
-	
-			vector<pair<int, float>> deg2Order(num_nodes);
-			degree_2_order(num_nodes, row_ptr, col_ind, deg2Order);
-			sort(deg2Order.begin(), deg2Order.end(), descending);
-			max = deg2Order[0].second;
-			min = deg2Order[deg2Order.size() - 1].second;
-			for(int i = 0; i < deg2Order.size(); i++) {
-				if(max == min) deg2Order[i].second = numForEqualMaxMin;
-				else deg2Order[i].second = (deg2Order[i].second - min) / (max - min);	
-			}
-			sort(deg2Order.begin(), deg2Order.end(), ascendingFirst);
-
-			vector<pair<int, float>> deg3Order(num_nodes);
-			degree_3_order(num_nodes, row_ptr, col_ind, deg3Order);
-			sort(deg3Order.begin(), deg3Order.end(), descending);
-			max = deg3Order[0].second;
-			min = deg3Order[deg3Order.size() - 1].second;
-			for(int i = 0; i < deg3Order.size(); i++) {
-				if(max == min) deg3Order[i].second = numForEqualMaxMin;
-				else deg3Order[i].second = (deg3Order[i].second - min) / (max - min);	
-			}
-			sort(deg3Order.begin(), deg3Order.end(), ascendingFirst);
-
-			vector<pair<int, float>> clussCoeffOrder(num_nodes);
-			clustering_coeff(num_nodes, row_ptr, col_ind, clussCoeffOrder);
-			sort(clussCoeffOrder.begin(), clussCoeffOrder.end(), descending);
-			max = clussCoeffOrder[0].second;
-			min = clussCoeffOrder[clussCoeffOrder.size() - 1].second;
-			for(int i = 0; i < clussCoeffOrder.size(); i++) {
-				if(max == min) clussCoeffOrder[i].second = numForEqualMaxMin;
-				else clussCoeffOrder[i].second = (clussCoeffOrder[i].second - min) / (max - min);	
-			}
-			sort(clussCoeffOrder.begin(), clussCoeffOrder.end(), ascendingFirst);
-
-			vector<pair<int, float>> closenessCentralityOrder(num_nodes);
-			closeness_centrality(num_nodes, row_ptr, col_ind, closenessCentralityOrder);
-			sort(closenessCentralityOrder.begin(), closenessCentralityOrder.end(), descending);
-			max = closenessCentralityOrder[0].second;
-			min = closenessCentralityOrder[closenessCentralityOrder.size() - 1].second;
-			for(int i = 0; i < closenessCentralityOrder.size(); i++) {
-				if(max == min) closenessCentralityOrder[i].second = numForEqualMaxMin;
-				else closenessCentralityOrder[i].second = (closenessCentralityOrder[i].second - min) / (max - min);	
-			}
-			sort(closenessCentralityOrder.begin(), closenessCentralityOrder.end(), ascendingFirst);
-
-			vector<pair<int, float>> pageRankOrder(num_nodes);
-			page_rank(num_nodes, row_ptr, col_ind, pageRankOrder);
-			sort(pageRankOrder.begin(), pageRankOrder.end(), descending);
-			max = pageRankOrder[0].second;
-			min = pageRankOrder[pageRankOrder.size() - 1].second;
-			for(int i = 0; i < pageRankOrder.size(); i++) {
-				if(max == min) pageRankOrder[i].second = numForEqualMaxMin;
-				else pageRankOrder[i].second = (pageRankOrder[i].second - min) / (max - min);	
-			}
-			sort(pageRankOrder.begin(), pageRankOrder.end(), ascendingFirst);
-					
-			vector<pair<int, float>> finalOrder(num_nodes);
-			for(int i = 0; i < num_nodes; i++) {
-				float value = (float) (deg1Order[i].second * weightList[0] + deg2Order[i].second * weightList[1] 
-							+ deg3Order[i].second * weightList[2] + clussCoeffOrder[i].second * weightList[3] 
-							+ closenessCentralityOrder[i].second * weightList[4] + pageRankOrder[i].second * weightList[5]);
-				finalOrder[i]= make_pair(i, value);
-				// cout << "Value: " << finalOrder[i].second << " - Node: " << finalOrder[i].first << endl;
-			}
-			
-			vector<int> color_arr;
-			sort(finalOrder.begin(), finalOrder.end(), descending);
-			int result = graph_coloring(row_ptr, col_ind, finalOrder, color_arr, maxDegree, "Weighted Result");
-			out << result << endl;
-			totalColor += result;
-    	}
-		closedir(pDIR);
-		cout << "Total result is: " << totalColor << endl;
-	}
-	out.close();
 }
+
 
 int main(int argc, char** argv) {
-	// findDifferentOrderings(argv[1]);
-	findWeightedAnalysis(argv[1], "./ordering_greedy_results.csv", 1347);
-	// findWeightedAnalysis(argv[1], NULL, 1347, {0.15, 0, 0.1, 0.7, 0.05, 0});
+
+	const char* path = argv[1];
+	DIR *pDIR;
+	struct dirent *entry;
+	map<string, int> ht;
+	/*
+	const char* chrom = "chromatic_numbers.csv";
+	ifstream f(chrom);
+	string graphname;
+	int chronum;
+	getline(f, graphname);
+
+	while(!f.eof()){
+		getline(f, graphname);
+		if(graphname.length()<2){
+			break;
+		}
+		graphname = graphname.substr(0, graphname.rfind(","));
+		string d = graphname.substr(graphname.rfind(",")+1, graphname.length());
+		graphname = graphname.substr(0, graphname.find(","));
+		chronum = stoi(d);
+		ht.insert(pair<string,int>(graphname, chronum));
+	}
+	*/
+	vector<string> gnames;
+	vector<pair<vector<int>, vector<int> > > graphs;
+	if (pDIR = opendir(path)) {
+		while (entry = readdir(pDIR)) {
+			//cout << entry->d_name << endl;
+			string g = entry->d_name;
+			string fname = path + ((string)entry->d_name);
+			if (fname.at(fname.length() - 1) == '.') {
+				continue;
+			}
+			cout << g << endl;
+			gnames.push_back(g);
+
+			//cout << fname << endl;
+			int num_nodes, num_edges;
+			vector<int> row_ptr, col_ind;
+			if (read_graphs(fname, num_nodes, num_edges, row_ptr, col_ind, graphs) == -1) {
+				cerr << "error reading graph" << endl;
+				return 0;
+			}
+
+			//baseline
+			vector <pair<int, float> > orders(num_nodes);
+			vector<int> color_arr;
+			degree_order(num_nodes, row_ptr, col_ind, orders);
+			int maxdegree = INT_MIN;
+			for(auto & x: orders){
+				if(x.second>maxdegree){
+					maxdegree = x.second;
+				}
+			}
+			//degree_2_order(num_nodes, row_ptr, col_ind, orders);
+			sort(orders.begin(), orders.end(), descending);
+			int k = graph_coloring(row_ptr, col_ind, orders, color_arr, maxdegree);
+			ht.insert(pair<string,int>(g,k));
+    }
+		closedir(pDIR);
+	}
+	float sum;
+
+	vector<vector<float> > coefficients(32,vector<float>(6));
+	vector<float> min_colors(32, INT_MAX);
+	vector<float> coef_list(21);
+	for(int i=0; i<=20; i++){coef_list[i] = i*0.05;}
+	cout << "it begins" << endl;
+
+
+
+	//#pragma omp parallel for collapse(6) schedule(dynamic) num_threads(6)
+	for(int i1 = 0; i1 < 21; i1 +=20){
+		for(int i2 = 0; i2 < 21; i2+=20){
+			for(int i3 = 0; i3 < 21; i3+=20){
+				for(int i4 = 0; i4 < 21; i4 +=20){
+					for(int i5 = 0; i5 < 21; i5+=20){
+						for(int i6 = 0; i6 < 21; i6+=20){
+								float c1,c2,c3,c4,c5,c6;
+								c1 = coef_list[i1];
+								c2 = coef_list[i2];
+								c3 = coef_list[i3];
+								c4 = coef_list[i4];
+								c5 = coef_list[i5];
+								c6 = coef_list[i6];
+								sum = c1+c2+c3+c4+c5+c6;
+								if(sum== 1){
+									printf("%f %f %f %f %f %f\n", c1 ,c2 ,c3, c4, c5, c6);
+									float total_colors = 0;
+									int tid = omp_get_thread_num();
+									int i = 0;
+									for(auto & graph: graphs){
+										auto & row_ptr = graph.first;
+										auto & col_ind = graph.second;
+										int num_nodes = row_ptr.size()-1;
+										vector<vector <pair<int, float> > > orders(6, vector<pair<int,float> >(num_nodes));
+										degree_order(num_nodes, row_ptr, col_ind, orders[0]);
+										cout << "degree ordered" << endl;
+										int maxdegree = INT_MIN;
+										for(auto & x: orders[0]){
+											if(x.second>maxdegree){
+												maxdegree = x.second;
+											}
+										}
+										degree_2_order(num_nodes, row_ptr, col_ind, orders[1]);
+										cout << "degree2 ordered" << endl;
+										degree_3_order(num_nodes, row_ptr, col_ind, orders[2]);
+										cout << "degree3 ordered" << endl;
+										closeness_centrality_approx(num_nodes, row_ptr, col_ind, orders[3]);
+										cout << "closeness ordered" << endl;
+										clustering_coeff(num_nodes, row_ptr, col_ind, orders[4]);
+										cout << "clustering ordered" << endl;
+										page_rank(num_nodes, row_ptr, col_ind, orders[5]);
+										cout << "pagerank ordered" << endl;
+
+										normalize(orders);
+										cout << "normalized" << endl;
+
+										vector<int> color_arr;
+										vector<pair<int, float> > new_order(num_nodes);
+										for(int i=0; i<num_nodes; i++){
+											new_order[i] = make_pair(i,c1*orders[2][i].second + c2*orders[1][i].second + c3*orders[0][i].second + c4*orders[3][i].second + c5*orders[4][i].second + c6*orders[5][i].second);
+											//new_order[i] = make_pair(i,0.1*orders[2][i].second + 0*orders[1][i].second + 0.15*orders[0][i].second + 0.7*orders[3][i].second + 0.05*orders[4][i].second + 0*orders[5][i].second);
+											//new_order[i] = make_pair(i, orders[1][i].second);
+										}
+
+										sort(new_order.begin(), new_order.end(), descending);
+										float k = graph_coloring(row_ptr, col_ind, new_order, color_arr, maxdegree);
+										float d = ht[gnames[i]];
+										//cout << k << " " << d << endl;
+										if(d == 0){
+											continue;
+										}
+										printf("%d, %d\n", k,d);
+										total_colors += k/d;
+										i++;
+									}
+									total_colors = total_colors / (i);
+									printf("%f\t%f %f %f %f %f %f\n", total_colors, c1 ,c2 ,c3, c4, c5, c6);
+									if(total_colors < min_colors[tid]){
+										coefficients[tid][0] = c1;
+										coefficients[tid][1] = c2;
+										coefficients[tid][2] = c3;
+										coefficients[tid][3] = c4;
+										coefficients[tid][4] = c5;
+										coefficients[tid][5] = c6;
+										printf("Total colors : %f\n", total_colors);
+										min_colors[tid] = total_colors;
+									}
+								}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	float mincolors = INT_MAX;
+	int tid =-1;
+	for(int i=0; i<min_colors.size(); i++){
+		if(min_colors[i]<mincolors){
+			mincolors = min_colors[i];
+			tid = i;
+		}
+	}
+	cout << "best result is " << mincolors << endl;
+	cout << "Coefficients are ";
+	for(auto & x: coefficients[tid]){
+		cout << x << " ";
+	}
+	cout << endl;
+
 	return 0;
 }
