@@ -9,6 +9,7 @@
 #include <string>
 #include<dirent.h>
 #include <climits>
+#include <time.h>
 #include <cmath>
 #include <omp.h>
 #include <map>
@@ -140,11 +141,13 @@ void bfs(int start_node, int num_nodes, vector<int> row_ptr, vector<int> col_ind
 
 
 void closeness_centrality_approx(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float> > & ordering, int size = 100) {
+	srand(time(NULL));
 	vector<vector<int> > dist_arr(size, vector<int>(num_nodes));
 	omp_set_num_threads(32);
 #pragma omp parallel for num_threads(32)
 	for (int v = 0; v<size; v++) {
-	  bfs(v, num_nodes, row_ptr, col_ind, dist_arr[v]); // take distance array for node v
+	  	int start_node = rand()%num_nodes;
+	  	bfs(start_node, num_nodes, row_ptr, col_ind, dist_arr[v]); // take distance array for node v
 	}
 	#pragma omp barrier
 
