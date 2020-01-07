@@ -49,13 +49,12 @@ int graph_coloring(const vector<int> & row_ptr, const vector<int> & col_ind, con
 		for (int edge = row_ptr[node]; edge < row_ptr[node + 1]; edge++) {
 			hasEdge = true;
 			const int & adj = col_ind[edge];//for each adjacent node
-
-      for(int edge_2 = row_ptr[adj]; edge_2 < row_ptr[adj+1]; edge_2++){
-        const int & adj_neigh = col_ind[edge_2];
-        if (color_arr[adj_neigh] != -1) { // if it is already colored
-  				forbid_arr[color_arr[adj_neigh]] = node; // that color is forbidden to node
-  			}
-      }
+      		for(int edge_2 = row_ptr[adj]; edge_2 < row_ptr[adj+1]; edge_2++){
+      		  const int & adj_neigh = col_ind[edge_2];
+      		  if (color_arr[adj_neigh] != -1) { // if it is already colored
+  					forbid_arr[color_arr[adj_neigh]] = node; // that color is forbidden to node
+  				}
+      		}
 		}
 		for (int color = 0; color < ordering.size(); color++) { // greedily choose the smallest possible color
 			if (forbid_arr[color] != node) {
@@ -366,7 +365,8 @@ int main(int argc, char** argv) {
 	map<string, int> ht;
 
 	vector<string> gnames;
-	vector<pair<vector<int>, vector<int> > > graphs;//s = random_ugraphs_generator(10,100,9000);
+	vector<pair<vector<int>, vector<int> > > graphs;
+	//s = random_ugraphs_generator(10,100,9000);
 
 	// read graphs and store baseline in graphname-color map
 	if (pDIR = opendir(path)) {
