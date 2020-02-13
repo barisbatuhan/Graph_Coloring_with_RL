@@ -414,18 +414,22 @@ void write_to_csv(vector<string> labels, vector<vector<pair<int, float>>> &data,
 	ofstream output(absolute_path.c_str());
 	// label printing
 	string line;
-	for(int i = 0; i < labels.size(); i++)
+	for (int i = 0; i < labels.size(); i++)
 	{
-		if(i == 0) output << labels[i]; 
-		else output << "," << labels[i];
+		if (i == 0)
+			output << labels[i];
+		else
+			output << "," << labels[i];
 	}
 	output << endl;
-	for(int i = 0; i < data[1].size(); i++)
+	for (int i = 0; i < data[1].size(); i++)
 	{
-		for(int j = 0; j < data.size(); j++)
+		for (int j = 0; j < data.size(); j++)
 		{
-			if(j == 0) output << data[j][i].second; 
-			else output << "," << data[j][i].second; 
+			if (j == 0)
+				output << data[j][i].second;
+			else
+				output << "," << data[j][i].second;
 		}
 		output << endl;
 	}
@@ -445,19 +449,20 @@ void normal_params(vector<pair<int, float>> &order, float &mean, float &stdev)
 	stdev = sqrt(sq_sum / order.size() - mean * mean);
 }
 
-void normalize(vector<vector<pair<int, float>>> &orders)
+void normalize(vector<vector<pair<int, float>>> &orders, int num)
 {
+	if (num == -1)
+		num = orders.size();
 	float mean, stdev;
-	for (auto &order : orders)
+	for (int i = 0; i < num; i++)
 	{
-		normal_params(order, mean, stdev);
+		normal_params(orders[i], mean, stdev);
 		if (stdev == 0)
-		{
 			stdev = 0.0001;
-		}
-		for_each(order.begin(), order.end(), [mean, stdev](pair<int, float> &x) { x.second = (x.second - mean) / stdev; });
+		for_each(orders[i].begin(), orders[i].end(), [mean, stdev](pair<int, float> &x) { x.second = (x.second - mean) / stdev; });
 	}
 }
+
 vector<pair<vector<int>, vector<int>>> random_ugraphs_generator(int graph_cnt, int node_cnt, int edge_cnt)
 {
 	srand(112);
