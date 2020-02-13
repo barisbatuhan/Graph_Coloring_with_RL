@@ -36,7 +36,7 @@ void page_rank(int num_nodes, const vector<int> &row_ptr, const vector<int> &col
 int read_graphs(string &fname, int &num_nodes, int &num_edges, vector<int> &row_ptr, vector<int> &col_ind);
 void write_to_csv(vector<string> labels, vector<vector<pair<int, float>>> &data, string filename, string path = "./");
 void normal_params(vector<pair<int, float>> &order, float &mean, float &stdev);
-void normalize(vector<vector<pair<int, float>>> &orders, int num);
+void normalize(vector<vector<pair<int, float>>> &orders, int num = -1);
 vector<pair<vector<int>, vector<int>>> random_ugraphs_generator(int graph_cnt, int node_cnt, int edge_cnt);
 
 #endif
