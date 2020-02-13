@@ -1,0 +1,3 @@
+Path for matrices are:
+- for small: ./../../Matrices/small/
+- for large: ./../../Matrices/large/
