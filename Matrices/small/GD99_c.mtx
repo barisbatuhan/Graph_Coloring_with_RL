@@ -1,0 +1,173 @@
+%%MatrixMarket matrix coordinate pattern general
+%-------------------------------------------------------------------------------
+% UF Sparse Matrix Collection, Tim Davis
+% http://www.cise.ufl.edu/research/sparse/matrices/Pajek/GD99_c
+% name: Pajek/GD99_c
+% [Pajek network: Graph Drawing contest 1999]
+% id: 1499
+% date: 1999
+% author: Graph Drawing Contest
+% ed: V. Batagelj
+% fields: name title A id kind notes aux date author ed
+% aux: partition nodename coord
+% kind: directed graph
+%-------------------------------------------------------------------------------
+% notes:
+% ------------------------------------------------------------------------------
+% Pajek network converted to sparse adjacency matrix for inclusion in UF sparse 
+% matrix collection, Tim Davis.  For Pajek datasets, See V. Batagelj & A. Mrvar,
+% http://vlado.fmf.uni-lj.si/pub/networks/data/.                                
+% ------------------------------------------------------------------------------
+% The original problem had 3D xyz coordinates, but all values of z were equal   
+% to 0.5, and have been removed.  This graph has 2D coordinates.                
+%-------------------------------------------------------------------------------
+105 105 149
+6 1
+5 2
+7 2
+4 3
+8 3
+5 4
+1 5
+24 6
+6 7
+7 8
+26 9
+105 10
+94 11
+40 12
+26 13
+16 14
+26 15
+26 16
+16 17
+16 19
+16 20
+57 21
+15 22
+31 22
+13 23
+15 24
+13 25
+9 26
+16 26
+57 26
+24 27
+85 28
+85 29
+32 30
+86 30
+22 31
+45 31
+57 31
+22 32
+85 32
+54 33
+88 33
+91 33
+91 34
+92 34
+95 35
+50 36
+98 37
+98 38
+38 39
+38 40
+102 41
+101 42
+103 43
+100 44
+104 44
+31 45
+93 45
+28 46
+50 47
+87 47
+100 47
+53 48
+99 48
+87 49
+89 49
+45 50
+94 50
+31 51
+104 51
+48 52
+90 52
+91 52
+89 53
+87 54
+90 54
+93 54
+99 55
+29 56
+18 57
+21 57
+26 57
+31 57
+95 58
+45 59
+103 59
+59 60
+102 61
+61 62
+61 63
+53 64
+64 65
+65 66
+64 67
+91 67
+92 67
+88 68
+97 69
+96 70
+97 70
+96 71
+92 72
+48 73
+64 73
+98 73
+40 74
+86 75
+96 76
+86 77
+82 78
+78 79
+82 79
+81 80
+84 80
+78 81
+33 82
+82 83
+83 84
+32 85
+30 86
+47 87
+54 87
+33 88
+97 88
+49 89
+99 89
+52 90
+55 90
+33 91
+67 91
+34 92
+50 93
+50 94
+95 94
+94 95
+70 96
+88 97
+73 98
+55 99
+89 99
+47 100
+101 100
+100 101
+102 101
+101 102
+59 103
+105 103
+105 104
+104 105

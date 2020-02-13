@@ -1,8 +1,0 @@
-In order to run this code:
-
-Once:
-module load gcc/8.2.0
-
-In each run:
-g++ main.cpp -O3
-./a.out ../matrices/

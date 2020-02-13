@@ -8,8 +8,12 @@
 */*/*.out
 
 # Trial results
-*/metric_evaluation1.csv
-*/weighted_metric1.csv
+*/*/metric_evaluation1.csv
+*/*/weighted_metric1.csv
+*/out.csv
 
 # Caches:
 */*/*.gch
+
+# Large Matrices
+Matrices/large/*
