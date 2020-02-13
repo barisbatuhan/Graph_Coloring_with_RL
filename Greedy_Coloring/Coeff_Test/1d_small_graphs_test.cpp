@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 	struct dirent *entry;
 	map<string, int> ht;
 
-	const char *chrom = "chromatic_numbers.csv";
+	const char *chrom = "./../../Optimal_Coloring/chromatic_numbers.csv";
 	ifstream f(chrom);
 	string graphname;
 	int chronum;
