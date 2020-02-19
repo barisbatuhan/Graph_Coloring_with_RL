@@ -1,0 +1,179 @@
+Name,Family
+./../../Matrices/large/pkustk14.mtx,structural problem
+./../../Matrices/large/nm2010.mtx,undirected weighted graph
+./../../Matrices/large/FEM_3D_thermal2.mtx,thermal problem
+./../../Matrices/large/ga2010.mtx,undirected weighted graph
+./../../Matrices/large/c-big.mtx,optimization problem
+./../../Matrices/large/ship_003.mtx,structural problem
+./../../Matrices/large/power197k.mtx,power network problem
+./../../Matrices/large/SiO2.mtx,theoretical/quantum chemistry problem
+./../../Matrices/large/mario002.mtx,duplicate 2D/3D problem
+./../../Matrices/large/ohne2.mtx,semiconductor device problem
+./../../Matrices/large/wv2010.mtx,undirected weighted graph
+./../../Matrices/large/bmw7st_1.mtx,structural problem
+./../../Matrices/large/audikw_1.mtx,structural problem
+./../../Matrices/large/wave.mtx,2D/3D problem
+./../../Matrices/large/smallworld.mtx,random undirected graph
+./../../Matrices/large/shipsec1.mtx,structural problem
+./../../Matrices/large/coAuthorsDBLP.mtx,undirected graph
+./../../Matrices/large/3Dspectralwave2.mtx,materials problem
+./../../Matrices/large/cage13.mtx,directed weighted graph
+./../../Matrices/large/G_n_pin_pout.mtx,random undirected graph
+./../../Matrices/large/gsm_106857.mtx,electromagnetics problem
+./../../Matrices/large/co2010.mtx,undirected weighted graph
+./../../Matrices/large/ecology1.mtx,2D/3D problem
+./../../Matrices/large/halfb.mtx,structural problem
+./../../Matrices/large/144.mtx,undirected graph
+./../../Matrices/large/af_3_k101.mtx,structural problem
+./../../Matrices/large/loc-Gowalla.mtx,undirected graph
+./../../Matrices/large/caidaRouterLevel.mtx,undirected graph
+./../../Matrices/large/mono_500Hz.mtx,acoustics problem
+./../../Matrices/large/barrier2-12.mtx,subsequent semiconductor device problem
+./../../Matrices/large/il2010.mtx,undirected weighted graph
+./../../Matrices/large/power9.mtx,semiconductor device problem
+./../../Matrices/large/m14b.mtx,undirected graph
+./../../Matrices/large/bmw3_2.mtx,structural problem
+./../../Matrices/large/ma2010.mtx,undirected weighted graph
+./../../Matrices/large/mo2010.mtx,undirected weighted graph
+./../../Matrices/large/scircuit.mtx,circuit simulation problem
+./../../Matrices/large/shipsec8.mtx,structural problem
+./../../Matrices/large/ecology2.mtx,2D/3D problem
+./../../Matrices/large/x104.mtx,structural problem
+./../../Matrices/large/ford2.mtx,structural problem
+./../../Matrices/large/HTC_336_4438.mtx,power network problem
+./../../Matrices/large/com-DBLP.mtx,undirected graph with communities
+./../../Matrices/large/TEM152078.mtx,electromagnetics problem
+./../../Matrices/large/ne2010.mtx,undirected weighted graph
+./../../Matrices/large/kron_g500-logn19.mtx,undirected multigraph
+./../../Matrices/large/mi2010.mtx,undirected weighted graph
+./../../Matrices/large/nd2010.mtx,undirected weighted graph
+./../../Matrices/large/pwtk.mtx,structural problem
+./../../Matrices/large/BenElechi1.mtx,2D/3D problem
+./../../Matrices/large/fl2010.mtx,undirected weighted graph
+./../../Matrices/large/CoupCons3D.mtx,structural problem
+./../../Matrices/large/inline_1.mtx,structural problem
+./../../Matrices/large/engine.mtx,structural problem
+./../../Matrices/large/transient.mtx,circuit simulation problem
+./../../Matrices/large/rgg_n_2_18_s0.mtx,undirected random graph
+./../../Matrices/large/ia2010.mtx,undirected weighted graph
+./../../Matrices/large/Ge87H76.mtx,theoretical/quantum chemistry problem
+./../../Matrices/large/in2010.mtx,undirected weighted graph
+./../../Matrices/large/CurlCurl_2.mtx,model reduction problem
+./../../Matrices/large/bundle_adj.mtx,computer vision problem
+./../../Matrices/large/boyd2.mtx,optimization problem
+./../../Matrices/large/coPapersDBLP.mtx,undirected graph
+./../../Matrices/large/id2010.mtx,undirected weighted graph
+./../../Matrices/large/ms2010.mtx,undirected weighted graph
+./../../Matrices/large/lp1.mtx,optimization problem
+./../../Matrices/large/filter3D.mtx,model reduction problem
+./../../Matrices/large/preferentialAttachment.mtx,random undirected graph
+./../../Matrices/large/troll.mtx,structural problem
+./../../Matrices/large/nj2010.mtx,undirected weighted graph
+./../../Matrices/large/Hardesty1.mtx,computer graphics/vision problem
+./../../Matrices/large/citationCiteseer.mtx,undirected graph
+./../../Matrices/large/ca2010.mtx,undirected weighted graph
+./../../Matrices/large/Ga19As19H42.mtx,theoretical/quantum chemistry problem
+./../../Matrices/large/com-Amazon.mtx,undirected graph with communities
+./../../Matrices/large/az2010.mtx,undirected weighted graph
+./../../Matrices/large/af_shell6.mtx,subsequent structural problem
+./../../Matrices/large/ok2010.mtx,undirected weighted graph
+./../../Matrices/large/fullb.mtx,structural problem
+./../../Matrices/large/ky2010.mtx,undirected weighted graph
+./../../Matrices/large/TEM181302.mtx,electromagnetics problem
+./../../Matrices/large/3Dspectralwave.mtx,materials problem
+./../../Matrices/large/ny2010.mtx,undirected weighted graph
+./../../Matrices/large/2cubes_sphere.mtx,electromagnetics problem
+./../../Matrices/large/kron_g500-logn17.mtx,undirected multigraph
+./../../Matrices/large/F1.mtx,structural problem
+./../../Matrices/large/ch7-8-b5.mtx,combinatorial problem
+./../../Matrices/large/mt2010.mtx,undirected weighted graph
+./../../Matrices/large/test1.mtx,semiconductor device problem
+./../../Matrices/large/nc2010.mtx,undirected weighted graph
+./../../Matrices/large/Dubcova3.mtx,2D/3D problem
+./../../Matrices/large/kron_g500-logn18.mtx,undirected multigraph
+./../../Matrices/large/c-73b.mtx,subsequent optimization problem
+./../../Matrices/large/para-4.mtx,semiconductor device problem
+./../../Matrices/large/la2010.mtx,undirected weighted graph
+./../../Matrices/large/Ga10As10H30.mtx,theoretical/quantum chemistry problem
+./../../Matrices/large/rgg_n_2_19_s0.mtx,undirected random graph
+./../../Matrices/large/auto.mtx,undirected graph
+./../../Matrices/large/mn2010.mtx,undirected weighted graph
+./../../Matrices/large/delaunay_n19.mtx,undirected graph
+./../../Matrices/large/dblp-2010.mtx,undirected graph
+./../../Matrices/large/pa2010.mtx,undirected weighted graph
+./../../Matrices/large/ar2010.mtx,undirected weighted graph
+./../../Matrices/large/CO.mtx,theoretical/quantum chemistry problem
+./../../Matrices/large/gearbox.mtx,structural problem
+./../../Matrices/large/Fault_639.mtx,structural problem
+./../../Matrices/large/CurlCurl_1.mtx,model reduction problem
+./../../Matrices/large/ut2010.mtx,undirected weighted graph
+./../../Matrices/large/coAuthorsCiteseer.mtx,undirected graph
+./../../Matrices/large/sc2010.mtx,undirected weighted graph
+./../../Matrices/large/largebasis.mtx,optimization problem
+./../../Matrices/large/cont-300.mtx,optimization problem
+./../../Matrices/large/cfd2.mtx,computational fluid dynamics problem
+./../../Matrices/large/d_pretok.mtx,2D/3D problem
+./../../Matrices/large/ks2010.mtx,undirected weighted graph
+./../../Matrices/large/Ga41As41H72.mtx,theoretical/quantum chemistry problem
+./../../Matrices/large/delaunay_n18.mtx,undirected graph
+./../../Matrices/large/radiation.mtx,semiconductor device problem
+./../../Matrices/large/cop20k_A.mtx,2D/3D problem
+./../../Matrices/large/wi2010.mtx,undirected weighted graph
+./../../Matrices/large/thermomech_TC.mtx,thermal problem
+./../../Matrices/large/thermomech_dM.mtx,thermal problem
+./../../Matrices/large/usroads-48.mtx,undirected graph
+./../../Matrices/large/cage12.mtx,directed weighted graph
+./../../Matrices/large/apache2.mtx,structural problem
+./../../Matrices/large/al2010.mtx,undirected weighted graph
+./../../Matrices/large/luxembourg_osm.mtx,undirected graph
+./../../Matrices/large/hcircuit.mtx,circuit simulation problem
+./../../Matrices/large/Lin.mtx,structural problem
+./../../Matrices/large/Emilia_923.mtx,structural problem
+./../../Matrices/large/Si41Ge41H72.mtx,theoretical/quantum chemistry problem
+./../../Matrices/large/vsp_mod2_pgp2_slptsk.mtx,random unweighted graph
+./../../Matrices/large/helm2d03.mtx,2D/3D problem
+./../../Matrices/large/tn2010.mtx,undirected weighted graph
+./../../Matrices/large/parabolic_fem.mtx,computational fluid dynamics problem
+./../../Matrices/large/598a.mtx,undirected graph
+./../../Matrices/large/fem_hifreq_circuit.mtx,electromagnetics problem
+./../../Matrices/large/vsp_finan512_scagr7-2c_rlfddd.mtx,random unweighted graph
+./../../Matrices/large/hvdc2.mtx,power network problem
+./../../Matrices/large/shipsec5.mtx,structural problem
+./../../Matrices/large/bmwcra_1.mtx,structural problem
+./../../Matrices/large/barrier2-3.mtx,subsequent semiconductor device problem
+./../../Matrices/large/Si87H76.mtx,theoretical/quantum chemistry problem
+./../../Matrices/large/imagesensor.mtx,semiconductor device problem
+./../../Matrices/large/para-6.mtx,subsequent semiconductor device problem
+./../../Matrices/large/md2010.mtx,undirected weighted graph
+./../../Matrices/large/TSOPF_FS_b39_c30.mtx,power network problem
+./../../Matrices/large/tmt_unsym.mtx,electromagnetics problem
+./../../Matrices/large/wa2010.mtx,undirected weighted graph
+./../../Matrices/large/Ge99H100.mtx,theoretical/quantum chemistry problem
+./../../Matrices/large/rgg_n_2_17_s0.mtx,undirected random graph
+./../../Matrices/large/dielFilterV2clx.mtx,electromagnetics problem
+./../../Matrices/large/offshore.mtx,electromagnetics problem
+./../../Matrices/large/turon_m.mtx,2D/3D problem
+./../../Matrices/large/dielFilterV3clx.mtx,electromagnetics problem
+./../../Matrices/large/va2010.mtx,undirected weighted graph
+./../../Matrices/large/delaunay_n17.mtx,undirected graph
+./../../Matrices/large/nxp1.mtx,circuit simulation problem
+./../../Matrices/large/tmt_sym.mtx,electromagnetics problem
+./../../Matrices/large/ASIC_320k.mtx,circuit simulation problem
+./../../Matrices/large/G2_circuit.mtx,circuit simulation problem
+./../../Matrices/large/usroads.mtx,undirected graph
+./../../Matrices/large/msdoor.mtx,structural problem
+./../../Matrices/large/ins2.mtx,optimization problem
+./../../Matrices/large/oh2010.mtx,undirected weighted graph
+./../../Matrices/large/Baumann.mtx,2D/3D problem
+./../../Matrices/large/analytics.mtx,data analytics problem
+./../../Matrices/large/tx2010.mtx,undirected weighted graph
+./../../Matrices/large/fcondp2.mtx,structural problem
+./../../Matrices/large/fe_ocean.mtx,undirected graph
+./../../Matrices/large/or2010.mtx,undirected weighted graph
+./../../Matrices/large/xenon2.mtx,materials problem
+./../../Matrices/large/HTC_336_9129.mtx,power network problem
+./../../Matrices/large/lung2.mtx,computational fluid dynamics problem
+./../../Matrices/large/ML_Laplace.mtx,structural problem
+./../../Matrices/large/PFlow_742.mtx,2D/3D problem
+./../../Matrices/large/coPapersCiteseer.mtx,undirected graph
+./../../Matrices/large/hood.mtx,structural problem
