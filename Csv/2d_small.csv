@@ -1,0 +1,193 @@
+gname;family;nodes;edges;degree1;degree2;degree3;closeness;clustering;pagerank;weighted;uniform
+mcca.mtx;2D/3D problem;180;4958;64;64;65;64;69;65;64;66
+plskz362.mtx;2D/3D problem;362;1760;12;11;10;9;11;12;9;13
+ck104.mtx;2D/3D problem;104;1776;14;13;13;10;14;14;10;14
+grid1_dual.mtx;2D/3D problem;224;840;10;8;7;8;10;10;8;10
+cz148.mtx;2D/3D problem;148;2758;38;35;35;37;38;38;37;36
+pde225.mtx;2D/3D problem;225;1680;8;8;11;7;8;8;7;9
+nnc261.mtx;2D/3D problem;261;2700;19;18;19;18;19;21;18;20
+problem1.mtx;2D/3D problem;415;4728;13;13;13;10;13;14;11;14
+ck400.mtx;2D/3D problem;400;4920;15;15;15;10;14;14;11;15
+grid1.mtx;2D/3D problem;252;952;10;9;8;8;10;8;7;9
+cz308.mtx;2D/3D problem;308;5748;34;31;33;34;33;34;35;35
+plat362.mtx;2D/3D problem;362;5424;31;27;25;25;30;35;23;32
+odepa400.mtx;2D/3D problem;400;1602;5;5;5;5;5;6;5;5
+west0479.mtx;chemical process simulation problem;479;3804;39;39;39;39;39;39;39;39
+west0156.mtx;chemical process simulation problem;156;742;13;12;13;12;14;14;13;16
+west0381.mtx;chemical process simulation problem;381;4312;79;62;63;64;83;80;64;78
+impcol_a.mtx;chemical process simulation problem;207;1128;16;15;16;15;17;16;15;18
+bwm200.mtx;chemical process simulation problem;200;1192;8;8;8;4;8;7;4;8
+impcol_d.mtx;chemical process simulation problem;425;2608;20;17;18;19;20;21;19;20
+west0132.mtx;chemical process simulation problem;132;816;23;23;23;23;24;24;23;25
+impcol_e.mtx;chemical process simulation problem;225;2504;49;48;52;52;58;48;48;53
+west0497.mtx;chemical process simulation problem;497;3442;58;58;58;58;58;58;58;58
+impcol_c.mtx;chemical process simulation problem;137;720;16;15;15;16;16;16;16;18
+west0167.mtx;chemical process simulation problem;167;986;21;21;21;21;21;22;21;22
+rajat05.mtx;circuit simulation problem;301;2172;26;26;26;26;26;26;26;26
+rajat14.mtx;circuit simulation problem;180;2664;163;163;163;163;163;163;163;163
+rajat11.mtx;circuit simulation problem;135;1360;44;44;44;44;44;44;44;44
+oscil_trans_01.mtx;circuit simulation problem;430;2436;13;13;13;13;13;13;13;13
+Trefethen_200.mtx;combinatorial problem;200;2690;32;31;32;30;35;31;30;37
+Trefethen_300.mtx;combinatorial problem;300;4378;36;36;36;35;38;39;35;40
+Trefethen_500.mtx;combinatorial problem;500;7978;41;39;39;40;43;41;38;44
+Trefethen_200b.mtx;combinatorial problem;199;2674;30;31;31;31;37;33;31;37
+n3c6-b1.mtx;combinatorial problem;105;420;22;22;20;22;20;23;22;24
+Trefethen_150.mtx;combinatorial problem;150;1890;30;30;32;30;32;30;30;32
+tols340.mtx;computational fluid dynamics problem;340;3848;90;90;90;90;90;90;90;90
+ex2.mtx;computational fluid dynamics problem;441;26398;133;125;125;125;135;147;125;154
+poisson2D.mtx;computational fluid dynamics problem;367;4100;13;12;12;11;13;13;11;14
+olm500.mtx;computational fluid dynamics problem;500;2992;8;8;8;6;9;8;6;9
+ex1.mtx;computational fluid dynamics problem;216;8272;62;59;59;59;61;64;59;73
+olm100.mtx;computational fluid dynamics problem;100;592;8;8;9;6;9;8;6;7
+lnsp_131.mtx;computational fluid dynamics problem;131;848;14;15;15;15;16;15;14;17
+rdb200.mtx;computational fluid dynamics problem;200;1840;11;11;10;9;11;12;9;11
+lns_131.mtx;computational fluid dynamics problem;131;848;15;15;15;15;16;15;14;17
+tub100.mtx;computational fluid dynamics problem;100;592;5;7;7;4;5;5;4;6
+saylr1.mtx;computational fluid dynamics problem;238;1780;10;9;8;7;10;9;7;10
+steam1.mtx;computational fluid dynamics problem;240;7044;27;27;24;27;27;28;26;32
+rdb450.mtx;computational fluid dynamics problem;450;4260;12;11;12;8;12;11;6;12
+GD99_c.mtx;directed graph;105;298;8;7;7;6;7;7;6;7
+Harvard500.mtx;directed graph;500;5126;201;201;201;201;201;201;201;201
+GD96_d.mtx;directed graph;180;458;28;28;28;28;28;28;28;28
+GD00_a.mtx;directed graph;352;768;44;44;44;44;44;44;44;44
+GD97_c.mtx;directed multigraph;452;920;76;76;76;76;76;76;76;76
+SmallW.mtx;directed multigraph;233;1988;148;148;148;148;148;148;148;148
+hor_131.mtx;directed weighted graph;434;8552;41;41;41;41;43;41;41;41
+celegansneural.mtx;directed weighted graph;297;4690;135;135;135;135;135;135;135;135
+cage7.mtx;directed weighted graph;340;5488;22;25;25;25;27;24;25;27
+GD01_a.mtx;directed weighted graph;259;1290;22;21;22;22;24;22;21;26
+gre_216b.mtx;directed weighted graph;216;1320;14;13;12;12;14;16;12;16
+gre_185.mtx;directed weighted graph;185;1640;17;15;14;14;17;18;13;19
+gre_343.mtx;directed weighted graph;343;2184;15;13;13;13;15;18;12;17
+gre_115.mtx;directed weighted graph;115;612;12;11;11;12;12;12;11;14
+bfwb398.mtx;electromagnetics problem;398;2512;18;16;17;15;17;19;16;20
+mhdb416.mtx;electromagnetics problem;416;1896;12;11;12;10;13;12;10;13
+bfwa398.mtx;electromagnetics problem;398;6560;25;24;23;23;27;28;23;30
+qc324.mtx;electromagnetics problem;324;26406;162;162;162;162;162;162;162;163
+mhda416.mtx;electromagnetics problem;416;16802;44;44;48;39;44;47;39;50
+utm300.mtx;electromagnetics problem;300;5710;40;39;39;38;46;45;37;46
+ash292.mtx;least squares problem;292;1916;15;16;17;15;16;16;15;17
+arc130.mtx;materials problem;130;2304;125;125;125;125;125;125;125;125
+cage_G_32.mtx;not available;26;104;14;14;14;14;14;14;14;14
+cage_G_21.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_34.mtx;not available;80;320;9;9;9;9;9;9;9;9
+cage_G_09.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_10.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_44.mtx;not available;266;3192;133;133;133;133;133;133;133;133
+cage_G_45.mtx;not available;366;5124;183;183;183;183;183;183;183;183
+cage_G_08.mtx;not available;58;174;6;6;6;8;6;6;8;6
+cage_G_39.mtx;not available;94;752;28;28;28;28;28;28;28;28
+cage_G_20.mtx;not available;58;174;8;8;8;7;8;8;7;8
+cage_G_25.mtx;not available;70;210;7;7;7;7;7;7;7;7
+cage_G_14.mtx;not available;58;174;7;7;7;8;7;7;8;7
+cage_G_11.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_24.mtx;not available;70;210;6;6;6;6;6;6;6;6
+cage_G_12.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_37.mtx;not available;62;372;32;32;32;32;32;32;32;32
+cage_G_31.mtx;not available;19;76;10;10;10;10;10;10;10;10
+cage_G_28.mtx;not available;272;816;7;7;7;7;7;7;7;7
+cage_G_03.mtx;not available;24;72;7;7;7;7;7;7;7;7
+cage_G_35.mtx;not available;30;150;11;11;11;11;11;11;11;11
+cage_G_19.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_16.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_36.mtx;not available;42;210;21;21;21;21;21;21;21;21
+cage_G_06.mtx;not available;58;174;7;7;7;9;7;7;9;7
+cage_G_40.mtx;not available;114;912;58;58;58;58;58;58;58;58
+cage_G_15.mtx;not available;58;174;8;8;8;7;8;8;7;8
+cage_G_04.mtx;not available;30;90;7;7;7;7;7;7;7;7
+cage_G_23.mtx;not available;70;210;7;7;7;7;7;7;7;7
+cage_G_29.mtx;not available;406;1218;8;8;8;8;8;8;8;8
+cage_G_22.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_07.mtx;not available;58;174;6;6;6;7;6;6;7;6
+cage_G_38.mtx;not available;50;350;50;50;50;50;50;50;50;50
+cage_G_43.mtx;not available;182;1820;40;40;40;40;40;40;40;40
+cage_G_42.mtx;not available;146;1314;30;31;31;31;30;30;31;30
+cage_G_01.mtx;not available;10;30;10;10;10;10;10;10;10;10
+cage_G_05.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_27.mtx;not available;126;378;8;8;8;8;8;8;8;8
+cage_G_33.mtx;not available;76;304;10;10;10;10;10;10;10;10
+cage_G_17.mtx;not available;58;174;7;7;7;7;7;7;7;7
+cage_G_30.mtx;not available;620;1860;7;7;7;7;7;7;7;7
+cage_G_02.mtx;not available;14;42;7;7;7;7;7;7;7;7
+cage_G_13.mtx;not available;58;174;8;8;8;7;8;8;7;8
+cage_G_18.mtx;not available;58;174;7;7;7;7;7;7;7;7
+spaceStation_2.mtx;optimal control problem;329;5636;165;165;165;165;166;165;165;165
+spaceStation_3.mtx;optimal control problem;467;4844;67;62;62;62;62;63;62;62
+tumorAntiAngiogenesis_3.mtx;optimal control problem;410;3706;406;406;406;406;406;406;406;406
+tumorAntiAngiogenesis_7.mtx;optimal control problem;475;4312;471;471;471;471;471;471;471;471
+hangGlider_1.mtx;optimal control problem;360;3278;319;319;319;319;319;319;319;319
+tumorAntiAngiogenesis_2.mtx;optimal control problem;305;2516;301;301;301;301;301;301;301;301
+tumorAntiAngiogenesis_8.mtx;optimal control problem;490;4482;486;486;486;486;486;486;486;486
+tumorAntiAngiogenesis_4.mtx;optimal control problem;455;4320;451;451;451;451;451;451;451;451
+tumorAntiAngiogenesis_1.mtx;optimal control problem;205;1660;201;201;201;201;201;201;201;201
+orbitRaising_1.mtx;optimal control problem;442;2666;33;26;26;26;27;32;26;30
+tumorAntiAngiogenesis_6.mtx;optimal control problem;465;4516;461;461;461;461;461;461;461;461
+tumorAntiAngiogenesis_5.mtx;optimal control problem;460;4414;456;456;456;456;456;456;456;456
+str_0.mtx;optimization problem sequence;363;4904;52;52;51;51;56;51;51;60
+bcspwr05.mtx;power network problem;443;1180;10;10;10;10;10;10;10;11
+bcspwr03.mtx;power network problem;118;358;10;10;10;10;10;10;10;10
+bcspwr04.mtx;power network problem;274;1338;17;17;17;16;18;17;16;17
+494_bus.mtx;power network problem;494;1172;10;10;10;10;10;10;10;10
+robot.mtx;robotics problem;120;1580;31;31;31;31;36;34;31;39
+gent113.mtx;statistical/mathematical problem;113;1130;34;28;28;28;28;32;28;33
+rw496.mtx;statistical/mathematical problem;496;3718;13;16;14;11;14;12;11;13
+lop163.mtx;statistical/mathematical problem;163;1544;19;17;16;13;19;16;12;19
+pivtol.mtx;statistical/mathematical problem;102;408;4;4;5;5;5;5;5;5
+rw136.mtx;statistical/mathematical problem;136;958;12;12;12;10;13;12;10;12
+dwt_346.mtx;structural problem;346;2880;24;22;23;23;24;23;22;27
+can_292.mtx;structural problem;292;2248;37;35;35;35;37;39;35;40
+lund_a.mtx;structural problem;147;2302;26;25;24;24;26;30;24;36
+will199.mtx;structural problem;199;1358;20;19;19;18;20;21;19;21
+sphere3.mtx;structural problem;258;1536;14;13;13;12;14;13;12;14
+dwt_221.mtx;structural problem;221;1408;14;13;14;13;15;14;14;15
+can_161.mtx;structural problem;161;1216;22;17;17;20;22;21;20;17
+rotor1.mtx;structural problem;100;1284;61;61;61;61;61;61;61;61
+nos5.mtx;structural problem;468;4704;29;28;29;27;34;27;28;37
+can_256.mtx;structural problem;256;2660;83;83;83;83;83;83;83;83
+mesh3em5.mtx;structural problem;289;1600;13;12;13;9;13;14;9;13
+can_229.mtx;structural problem;229;1548;15;13;15;13;15;18;13;16
+bcsstk04.mtx;structural problem;132;3516;66;66;66;66;64;66;66;68
+dwt_198.mtx;structural problem;198;1194;12;12;13;14;12;12;12;13
+dwt_361.mtx;structural problem;361;2592;15;17;15;9;16;16;9;14
+dwt_310.mtx;structural problem;310;2138;15;13;13;12;15;16;12;17
+Chebyshev1.mtx;structural problem;261;4116;261;261;261;261;261;261;261;261
+dwt_492.mtx;structural problem;492;2664;14;12;12;12;14;14;12;16
+can_445.mtx;structural problem;445;3364;16;16;16;15;16;19;15;17
+bcsstk20.mtx;structural problem;485;2650;14;13;13;11;14;12;12;15
+bcsstk06.mtx;structural problem;420;7440;41;33;32;32;35;39;33;44
+can_187.mtx;structural problem;187;1304;13;13;12;13;12;13;13;15
+dwt_209.mtx;structural problem;209;1534;17;17;17;18;17;17;17;20
+bcsstk22.mtx;structural problem;138;558;11;13;12;12;13;12;12;11
+dwt_245.mtx;structural problem;245;1216;14;14;14;13;15;14;14;17
+nos1.mtx;structural problem;237;780;9;8;8;6;9;9;6;9
+dwt_307.mtx;structural problem;307;2216;14;14;14;13;14;16;14;17
+bcsstm07.mtx;structural problem;420;6832;38;35;30;31;34;40;32;42
+nos4.mtx;structural problem;100;494;12;12;12;12;13;13;12;14
+can_144.mtx;structural problem;144;1152;18;18;18;18;18;17;18;19
+dwt_419.mtx;structural problem;419;3144;17;16;16;16;17;17;17;19
+dwt_193.mtx;structural problem;193;3300;34;31;33;31;34;36;31;36
+dwt_162.mtx;structural problem;162;1020;12;13;12;11;12;13;11;14
+dwt_234.mtx;structural problem;234;600;10;10;10;10;10;12;10;10
+mesh2em5.mtx;structural problem;306;1712;12;12;12;12;12;13;11;13
+bcsstk03.mtx;structural problem;112;528;9;7;10;6;8;10;6;10
+bcsstk05.mtx;structural problem;153;2270;32;33;33;33;33;32;33;35
+fs_183_6.mtx;subsequent 2D/3D problem;183;1772;105;105;105;105;107;105;105;105
+oscil_dcop_19.mtx;subsequent circuit simulation problem;430;2356;13;13;13;13;13;13;13;13
+cavity03.mtx;subsequent computational fluid dynamics problem;317;14168;64;65;63;62;64;64;62;81
+cavity02.mtx;subsequent computational fluid dynamics problem;317;14168;65;68;62;62;66;66;63;77
+str_200.mtx;subsequent optimization problem;363;6132;68;64;65;65;81;71;65;77
+str_600.mtx;subsequent optimization problem;363;6550;74;72;76;74;86;75;74;88
+str_400.mtx;subsequent optimization problem;363;6310;71;71;71;71;85;71;71;83
+lshp_265.mtx;thermal problem;265;1488;12;12;14;10;13;13;10;11
+lshp_406.mtx;thermal problem;406;2310;13;12;12;11;13;14;11;13
+Erdos971.mtx;undirected graph;433;2628;42;43;42;42;47;42;42;47
+GD06_theory.mtx;undirected graph;101;380;25;26;26;26;25;25;26;28
+Erdos981.mtx;undirected graph;445;2762;44;44;43;44;46;44;43;51
+adjnoun.mtx;undirected graph;112;850;50;50;50;50;50;50;50;50
+Erdos991.mtx;undirected graph;454;2834;44;44;43;43;50;44;43;50
+GD98_c.mtx;undirected graph;112;336;7;7;7;8;7;7;8;7
+polbooks.mtx;undirected graph;105;882;29;28;29;29;31;29;29;30
+jazz.mtx;undirected multigraph;198;5484;105;105;109;105;109;104;105;108
+celegans_metabolic.mtx;undirected multigraph;453;4050;238;238;238;238;238;238;238;238
+football.mtx;undirected multigraph;115;1226;27;25;27;25;28;25;27;28
+USAir97.mtx;undirected weighted graph;332;4252;140;140;140;140;140;140;140;140
