@@ -34,6 +34,7 @@ void degree_2_order(int num_nodes, const vector<int> &row_ptr, const vector<int>
 void degree_3_order(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering);
 void page_rank(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering, int iter = 20, float alpha = 0.85);
 int read_graphs(string &fname, int &num_nodes, int &num_edges, vector<int> &row_ptr, vector<int> &col_ind);
+string read_family(string &fname);
 void write_to_csv(vector<string> labels, vector<vector<pair<int, float>>> &data, string filename, string path = "./");
 void normal_params(vector<pair<int, float>> &order, float &mean, float &stdev);
 void normalize(vector<vector<pair<int, float>>> &orders, int num = -1);

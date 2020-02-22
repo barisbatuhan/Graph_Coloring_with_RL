@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 
 	ofstream out;
 	out.open("1dsmallresults.csv");
-	out << "gname,nodes,edges,degree1,degree2,degree3,closeness,clustering,pagerank,weighted,uniform,random" << endl;
+	out << "gname,family,nodes,edges,degree1,degree2,degree3,closeness,clustering,pagerank,weighted,uniform,random" << endl;
 
 	vector<float> results(9, 0.0);
 	int k = 0;
@@ -90,8 +90,11 @@ int main(int argc, char **argv)
 			orders[7][i] = make_pair(i, 1 / 6 * orders[0][i].second + 1 / 6 * orders[1][i].second + 1 / 6 * orders[2][i].second + 1 / 6 * orders[3][i].second + 1 / 6 * orders[4][i].second + 1 / 6 * orders[5][i].second);
 		}
 
+		string path_to_graph = string(path) + gnames[k];
+		string family = read_family(path_to_graph);
+
 		float d = ht[gnames[k]];
-		out << gnames[k] << "," << num_nodes << "," << num_edges << ",";
+		out << gnames[k] << "," << family << "," << num_nodes << "," << num_edges << ",";
 
 		// sort values to create permutations
 		for (int i = 0; i < orders.size(); i++)

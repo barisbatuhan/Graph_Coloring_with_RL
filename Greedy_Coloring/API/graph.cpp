@@ -408,6 +408,29 @@ int read_graphs(string &fname, int &num_nodes, int &num_edges, vector<int> &row_
 	return 0;
 }
 
+string read_family(string &fname)
+{
+	string family = "";
+	ifstream input(fname.c_str());
+	if (input.fail())
+	{
+		return "Not Found!!!";
+	}
+	// read graph
+	string line = "%";
+	while (line.find("%") != string::npos)
+	{
+		getline(input, line);
+        if(line.find("kind:") != string::npos) {
+            family = line.substr(8);
+            // cout << fname << " - " << family << endl;
+            break;
+        }
+	}
+    input.close();
+    return family;
+}
+
 void write_to_csv(vector<string> labels, vector<vector<pair<int, float>>> &data, string filename, string path)
 {
 	string absolute_path = path + filename + ".csv";

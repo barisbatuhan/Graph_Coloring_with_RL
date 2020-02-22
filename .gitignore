@@ -16,3 +16,6 @@ Greedy_Coloring/Coeff_Test/*.csv
 
 # Large Matrices
 Matrices/large/*
+
+# OS icons
+desktop.ini

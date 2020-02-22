@@ -18,12 +18,12 @@ void get_filenames(vector<string> &filenames, const vector<string> &locations)
     }
 }
 
-int read_family(string &fname, string &family)
+string read_family(string &fname, string &family)
 {
 	ifstream input(fname.c_str());
 	if (input.fail())
 	{
-		return -1;
+		return "Not Found!!!";
 	}
 	// read graph
 	string line = "%";
@@ -32,11 +32,12 @@ int read_family(string &fname, string &family)
 		getline(input, line);
         if(line.find("kind:") != string::npos) {
             family = line.substr(8);
-            cout << fname << " - " << family << endl;
+            // cout << fname << " - " << family << endl;
             break;
         }
 	}
     input.close();
+    return family;
 }
 
 int main() {
