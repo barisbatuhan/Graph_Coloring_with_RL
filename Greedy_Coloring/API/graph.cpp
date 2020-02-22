@@ -423,6 +423,7 @@ string read_family(string &fname)
 		getline(input, line);
         if(line.find("kind:") != string::npos) {
             family = line.substr(8);
+			family = family.substr(0, family.length() - 1); // newline is excluded
             // cout << fname << " - " << family << endl;
             break;
         }
