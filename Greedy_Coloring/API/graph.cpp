@@ -410,11 +410,11 @@ int read_graphs(string &fname, int &num_nodes, int &num_edges, vector<int> &row_
 
 string read_family(string &fname)
 {
-	string family = "";
+	string family = "not available";
 	ifstream input(fname.c_str());
 	if (input.fail())
 	{
-		return "Not Found!!!";
+		return "-1";
 	}
 	// read graph
 	string line = "%";
