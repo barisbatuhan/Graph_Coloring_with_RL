@@ -120,6 +120,66 @@ int graph_1d_coloring(const vector<int> &row_ptr, const vector<int> &col_ind, co
 	return nofcolors;
 }
 
+void update_values(int node, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering) {
+	ordering[0].second = -1;
+	int begin = row_ptr[node];
+	int end = row_ptr[node + 1];
+	int degree = end - begin;
+	for(int i = begin; i < end; i++){
+		int adj = col_ind[i];
+		for(auto &el: ordering) {
+			if(el.first == adj) {
+				el.second -= el.second / degree;
+				break;
+			}
+		}
+	}
+}
+
+// ordering is directly changed to array of -1's!!!!!
+int dynamic_1d_coloring(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering)
+{
+	vector<int> color_arr(ordering.size(), -1);
+	int nofcolors = 0;
+	vector<int> forbid_arr(row_ptr.size() - 1, -1);
+	bool hasEdge = false;
+	for (int i = 0; i < ordering.size(); i++)
+	{
+		const int &node = ordering[0].first; //for each node in ordering
+		for (int edge = row_ptr[node]; edge < row_ptr[node + 1]; edge++)
+		{
+			hasEdge = true;
+			const int &adj = col_ind[edge]; //for each adjacent node
+			if (color_arr[adj] != -1)
+			{									   // if it is already colored
+				forbid_arr[color_arr[adj]] = node; // that color is forbidden to node
+			}
+		}
+		for (int color = 0; color < ordering.size(); color++)
+		{ // greedily choose the smallest possible color
+			if (forbid_arr[color] != node)
+			{
+				color_arr[node] = color;
+				if (nofcolors < color)
+				{
+					nofcolors = color;
+				}
+				break;
+			}
+		}
+		update_values(node, row_ptr, col_ind, ordering);
+		sort(ordering.begin(), ordering.end(), descending);
+	}
+	if (hasEdge)
+	{
+		nofcolors++;
+	}
+	if (!isValid(color_arr, row_ptr, col_ind, ordering.size()) == true) {
+		cout << "ERROR" << endl;
+	}
+	return nofcolors;
+}
+
 void clustering_coeff(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering)
 {
 	omp_set_num_threads(32);
@@ -421,15 +481,16 @@ string read_family(string &fname)
 	while (line.find("%") != string::npos)
 	{
 		getline(input, line);
-        if(line.find("kind:") != string::npos) {
-            family = line.substr(8);
+		if (line.find("kind:") != string::npos)
+		{
+			family = line.substr(8);
 			family = family.substr(0, family.length() - 1); // newline is excluded
-            // cout << fname << " - " << family << endl;
-            break;
-        }
+			// cout << fname << " - " << family << endl;
+			break;
+		}
 	}
-    input.close();
-    return family;
+	input.close();
+	return family;
 }
 
 void write_to_csv(vector<string> labels, vector<vector<pair<int, float>>> &data, string filename, string path)
