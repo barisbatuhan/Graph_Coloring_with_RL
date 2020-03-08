@@ -1,0 +1,193 @@
+﻿gname,family,nodes,edges,optimal
+ck104.mtx,2D/3D problem,104,1776,6
+ck400.mtx,2D/3D problem,400,4920,6
+cz148.mtx,2D/3D problem,148,2758,8
+cz308.mtx,2D/3D problem,308,5748,8
+grid1.mtx,2D/3D problem,252,952,2
+grid1_dual.mtx,2D/3D problem,224,840,2
+mcca.mtx,2D/3D problem,180,4958,34
+nnc261.mtx,2D/3D problem,261,2700,2
+odepa400.mtx,2D/3D problem,400,1602,3
+pde225.mtx,2D/3D problem,225,1680,2
+plat362.mtx,2D/3D problem,362,5424,7
+plskz362.mtx,2D/3D problem,362,1760,3
+problem1.mtx,2D/3D problem,415,4728,4
+bwm200.mtx,chemical process simulation problem,200,1192,2
+impcol_a.mtx,chemical process simulation problem,207,1128,4
+impcol_c.mtx,chemical process simulation problem,137,720,4
+impcol_d.mtx,chemical process simulation problem,425,2608,4
+impcol_e.mtx,chemical process simulation problem,225,2504,12
+west0132.mtx,chemical process simulation problem,132,816,4
+west0156.mtx,chemical process simulation problem,156,742,3
+west0167.mtx,chemical process simulation problem,167,986,4
+west0381.mtx,chemical process simulation problem,381,4312,5
+west0479.mtx,chemical process simulation problem,479,3804,4
+west0497.mtx,chemical process simulation problem,497,3442,4
+oscil_trans_01.mtx,circuit simulation problem,430,2436,5
+rajat05.mtx,circuit simulation problem,301,2172,4
+rajat11.mtx,circuit simulation problem,135,1360,6
+rajat14.mtx,circuit simulation problem,180,2664,6
+n3c6-b1.mtx,combinatorial problem,105,420,3
+Trefethen_150.mtx,combinatorial problem,150,1890,3
+Trefethen_200.mtx,combinatorial problem,200,2690,3
+Trefethen_200b.mtx,combinatorial problem,199,2674,3
+Trefethen_300.mtx,combinatorial problem,300,4378,3
+Trefethen_500.mtx,combinatorial problem,500,7978,3
+ex1.mtx,computational fluid dynamics problem,216,8272,10
+ex2.mtx,computational fluid dynamics problem,441,26398,45
+lns_131.mtx,computational fluid dynamics problem,131,848,5
+lnsp_131.mtx,computational fluid dynamics problem,131,848,5
+olm100.mtx,computational fluid dynamics problem,100,592,3
+olm500.mtx,computational fluid dynamics problem,500,2992,3
+poisson2D.mtx,computational fluid dynamics problem,367,4100,4
+rdb200.mtx,computational fluid dynamics problem,200,1840,2
+rdb450.mtx,computational fluid dynamics problem,450,4260,2
+saylr1.mtx,computational fluid dynamics problem,238,1780,2
+steam1.mtx,computational fluid dynamics problem,240,7044,6
+tols340.mtx,computational fluid dynamics problem,340,3848,19
+tub100.mtx,computational fluid dynamics problem,100,592,2
+GD00_a.mtx,directed graph,352,768,3
+GD96_d.mtx,directed graph,180,458,2
+GD99_c.mtx,directed graph,105,298,3
+Harvard500.mtx,directed graph,500,5126,21
+GD97_c.mtx,directed multigraph,452,920,2
+SmallW.mtx,directed multigraph,233,1988,8
+cage7.mtx,directed weighted graph,340,5488,5
+celegansneural.mtx,directed weighted graph,297,4690,8
+GD01_a.mtx,directed weighted graph,259,1290,6
+gre_115.mtx,directed weighted graph,115,612,2
+gre_185.mtx,directed weighted graph,185,1640,3
+gre_216b.mtx,directed weighted graph,216,1320,2
+gre_343.mtx,directed weighted graph,343,2184,2
+hor_131.mtx,directed weighted graph,434,8552,16
+bfwa398.mtx,electromagnetics problem,398,6560,5
+bfwb398.mtx,electromagnetics problem,398,2512,3
+mhda416.mtx,electromagnetics problem,416,16802,13
+mhdb416.mtx,electromagnetics problem,416,1896,6
+qc324.mtx,electromagnetics problem,324,26406,81
+utm300.mtx,electromagnetics problem,300,5710,8
+ash292.mtx,least squares problem,292,1916,6
+arc130.mtx,materials problem,130,2304,15
+cage_G_01.mtx,not available,10,30,3
+cage_G_02.mtx,not available,14,42,2
+cage_G_03.mtx,not available,24,72,3
+cage_G_04.mtx,not available,30,90,2
+cage_G_05.mtx,not available,58,174,3
+cage_G_06.mtx,not available,58,174,3
+cage_G_07.mtx,not available,58,174,3
+cage_G_08.mtx,not available,58,174,3
+cage_G_09.mtx,not available,58,174,3
+cage_G_10.mtx,not available,58,174,3
+cage_G_11.mtx,not available,58,174,3
+cage_G_12.mtx,not available,58,174,3
+cage_G_13.mtx,not available,58,174,3
+cage_G_14.mtx,not available,58,174,3
+cage_G_15.mtx,not available,58,174,3
+cage_G_16.mtx,not available,58,174,3
+cage_G_17.mtx,not available,58,174,3
+cage_G_18.mtx,not available,58,174,3
+cage_G_19.mtx,not available,58,174,3
+cage_G_20.mtx,not available,58,174,3
+cage_G_21.mtx,not available,58,174,3
+cage_G_22.mtx,not available,58,174,3
+cage_G_23.mtx,not available,70,210,2
+cage_G_24.mtx,not available,70,210,2
+cage_G_25.mtx,not available,70,210,2
+cage_G_27.mtx,not available,126,378,2
+cage_G_28.mtx,not available,272,816,3
+cage_G_29.mtx,not available,406,1218,2
+cage_G_30.mtx,not available,620,1860,3
+cage_G_31.mtx,not available,19,76,3
+cage_G_32.mtx,not available,26,104,2
+cage_G_33.mtx,not available,76,304,3
+cage_G_34.mtx,not available,80,320,2
+cage_G_35.mtx,not available,30,150,3
+cage_G_36.mtx,not available,42,210,2
+cage_G_37.mtx,not available,62,372,2
+cage_G_38.mtx,not available,50,350,4
+cage_G_39.mtx,not available,94,752,4
+cage_G_40.mtx,not available,114,912,2
+cage_G_42.mtx,not available,146,1314,2
+cage_G_43.mtx,not available,182,1820,2
+cage_G_44.mtx,not available,266,3192,2
+cage_G_45.mtx,not available,366,5124,2
+hangGlider_1.mtx,optimal control problem,360,3278,6
+orbitRaising_1.mtx,optimal control problem,442,2666,4
+spaceStation_2.mtx,optimal control problem,329,5636,7
+spaceStation_3.mtx,optimal control problem,467,4844,7
+tumorAntiAngiogenesis_1.mtx,optimal control problem,205,1660,4
+tumorAntiAngiogenesis_2.mtx,optimal control problem,305,2516,4
+tumorAntiAngiogenesis_3.mtx,optimal control problem,410,3706,4
+tumorAntiAngiogenesis_4.mtx,optimal control problem,455,4320,4
+tumorAntiAngiogenesis_5.mtx,optimal control problem,460,4414,4
+tumorAntiAngiogenesis_6.mtx,optimal control problem,465,4516,4
+tumorAntiAngiogenesis_7.mtx,optimal control problem,475,4312,4
+tumorAntiAngiogenesis_8.mtx,optimal control problem,490,4482,4
+str_0.mtx,optimization problem sequence,363,4904,4
+494_bus.mtx,power network problem,494,1172,3
+bcspwr03.mtx,power network problem,118,358,4
+bcspwr04.mtx,power network problem,274,1338,7
+bcspwr05.mtx,power network problem,443,1180,3
+robot.mtx,robotics problem,120,1580,5
+gent113.mtx,statistical/mathematical problem,113,1130,4
+lop163.mtx,statistical/mathematical problem,163,1544,2
+pivtol.mtx,statistical/mathematical problem,102,408,3
+rw136.mtx,statistical/mathematical problem,136,958,4
+rw496.mtx,statistical/mathematical problem,496,3718,4
+bcsstk03.mtx,structural problem,112,528,4
+bcsstk04.mtx,structural problem,132,3516,12
+bcsstk05.mtx,structural problem,153,2270,9
+bcsstk06.mtx,structural problem,420,7440,12
+bcsstk20.mtx,structural problem,485,2650,6
+bcsstk22.mtx,structural problem,138,558,5
+bcsstm07.mtx,structural problem,420,6832,12
+can_144.mtx,structural problem,144,1152,6
+can_161.mtx,structural problem,161,1216,4
+can_187.mtx,structural problem,187,1304,4
+can_229.mtx,structural problem,229,1548,4
+can_256.mtx,structural problem,256,2660,7
+can_292.mtx,structural problem,292,2248,5
+can_445.mtx,structural problem,445,3364,5
+Chebyshev1.mtx,structural problem,261,4116,7
+dwt_162.mtx,structural problem,162,1020,4
+dwt_193.mtx,structural problem,193,3300,8
+dwt_198.mtx,structural problem,198,1194,4
+dwt_209.mtx,structural problem,209,1534,5
+dwt_221.mtx,structural problem,221,1408,5
+dwt_234.mtx,structural problem,234,600,3
+dwt_245.mtx,structural problem,245,1216,5
+dwt_307.mtx,structural problem,307,2216,4
+dwt_310.mtx,structural problem,310,2138,4
+dwt_346.mtx,structural problem,346,2880,5
+dwt_361.mtx,structural problem,361,2592,4
+dwt_419.mtx,structural problem,419,3144,5
+dwt_492.mtx,structural problem,492,2664,4
+lund_a.mtx,structural problem,147,2302,9
+mesh2em5.mtx,structural problem,306,1712,4
+mesh3em5.mtx,structural problem,289,1600,3
+nos1.mtx,structural problem,237,780,2
+nos4.mtx,structural problem,100,494,3
+nos5.mtx,structural problem,468,4704,8
+rotor1.mtx,structural problem,100,1284,7
+sphere3.mtx,structural problem,258,1536,3
+will199.mtx,structural problem,199,1358,4
+fs_183_6.mtx,subsequent 2D/3D problem,183,1772,7
+oscil_dcop_19.mtx,subsequent circuit simulation problem,430,2356,3
+cavity02.mtx,subsequent computational fluid dynamics problem,317,14168,19
+cavity03.mtx,subsequent computational fluid dynamics problem,317,14168,19
+str_200.mtx,subsequent optimization problem,363,6132,4
+str_400.mtx,subsequent optimization problem,363,6310,4
+str_600.mtx,subsequent optimization problem,363,6550,5
+lshp_265.mtx,thermal problem,265,1488,4
+lshp_406.mtx,thermal problem,406,2310,4
+adjnoun.mtx,undirected graph,112,850,5
+Erdos971.mtx,undirected graph,433,2628,7
+Erdos981.mtx,undirected graph,445,2762,7
+Erdos991.mtx,undirected graph,454,2834,7
+GD06_theory.mtx,undirected graph,101,380,2
+GD98_c.mtx,undirected graph,112,336,3
+polbooks.mtx,undirected graph,105,882,6
+celegans_metabolic.mtx,undirected multigraph,453,4050,9
+football.mtx,undirected multigraph,115,1226,9
+jazz.mtx,undirected multigraph,198,5484,30
+USAir97.mtx,undirected weighted graph,332,4252,22

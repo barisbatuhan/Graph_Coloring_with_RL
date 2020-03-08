@@ -23,6 +23,8 @@ bool ascending(const pair<int, float> &left, const pair<int, float> &right);
 pair<int, float> add(const float &left, const pair<int, float> &right);
 bool isValid(const vector<int> &color_arr, const vector<int> &row_ptr, const vector<int> &col_ind, int num_nodes);
 int graph_1d_coloring(const vector<int> &row_ptr, const vector<int> &col_ind, const vector<pair<int, float>> &ordering);
+// int dynamic_1d_coloring(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering);
+void update_values(int node, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering);
 int graph_2d_coloring(const vector<int> &row_ptr, const vector<int> &col_ind, const vector<pair<int, float>> &ordering);
 void clustering_coeff(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering);
 bool bfstest(vector<int> &lhs, vector<int> &rhs);
@@ -39,5 +41,7 @@ void write_to_csv(vector<string> labels, vector<vector<pair<int, float>>> &data,
 void normal_params(vector<pair<int, float>> &order, float &mean, float &stdev);
 void normalize(vector<vector<pair<int, float>>> &orders, int num = -1);
 vector<pair<vector<int>, vector<int>>> random_ugraphs_generator(int graph_cnt, int node_cnt, int edge_cnt);
+
+int sentiment_1d_coloring(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & spare_order);
 
 #endif

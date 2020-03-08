@@ -1,18 +1,115 @@
 #include "./API/graph.h"
 
-int main()
+void get_filenames(vector<string> &filenames, const vector<string> &locations)
 {
-    // sample main
-    string path = "./../Matrices/small/494_bus.mtx";
-    int num_nodes, num_edges;
-    vector<int> row_ptr, col_ind;
-    read_graphs(path, num_nodes, num_edges, row_ptr, col_ind);
-    
-    vector<vector<pair<int, float>>> order(2, vector<pair<int, float>>(num_nodes));
-    degree_2_order(num_nodes, row_ptr, col_ind, order[0]);
-    page_rank(num_nodes, row_ptr, col_ind, order[1]);
-    
-    vector<string> labels = {"DEG2", "PR"};
-    write_to_csv(labels, order, "out");
+    for (int i = 0; i < locations.size(); i++)
+    {
+        if (auto dir = opendir(locations[i].c_str()))
+        {
+            while (auto f = readdir(dir))
+            {
+                if (!f->d_name || f->d_name[0] == '.')
+                    continue;
+
+                string path = locations[i] + f->d_name;
+                filenames.push_back(path);
+            }
+        }
+    }
+}
+
+void print_similarities(vector<vector<int>> &curr_similarities) {                                      
+    cout << "----------------------------------------------------------" << endl;
+    cout << "    \t | deg1\t | deg2\t | deg3\t | clos\t | coef\t | pran\t |" << endl;
+    cout << "----------------------------------------------------------" << endl;
+    cout << " deg1\t | " << curr_similarities[0][0] << "\t | " << curr_similarities[0][1] << "\t | " << curr_similarities[0][2]<< "\t | " << curr_similarities[0][3]
+         << "\t | " << curr_similarities[0][4] << "\t | " << curr_similarities[0][5] << "\t | "<< endl;
+    cout << " deg2\t | " << curr_similarities[1][0] << "\t | " << curr_similarities[1][1] << "\t | " << curr_similarities[1][2]<< "\t | " << curr_similarities[1][3]
+         << "\t | " << curr_similarities[1][4] << "\t | " << curr_similarities[1][5] << "\t | "<< endl;
+    cout << " deg3\t | " << curr_similarities[2][0] << "\t | " << curr_similarities[2][1] << "\t | " << curr_similarities[2][2]<< "\t | " << curr_similarities[2][3]
+         << "\t | " << curr_similarities[2][4] << "\t | " << curr_similarities[2][5] << "\t | "<< endl;
+    cout << " clos\t | " << curr_similarities[3][0] << "\t | " << curr_similarities[3][1] << "\t | " << curr_similarities[3][2]<< "\t | " << curr_similarities[3][3]
+         << "\t | " << curr_similarities[3][4] << "\t | " << curr_similarities[3][5] << "\t | "<< endl;
+    cout << " coef\t | " << curr_similarities[4][0] << "\t | " << curr_similarities[4][1] << "\t | " << curr_similarities[4][2]<< "\t | " << curr_similarities[4][3]
+         << "\t | " << curr_similarities[4][4] << "\t | " << curr_similarities[4][5] << "\t | "<< endl;
+    cout << " pran\t | " << curr_similarities[5][0] << "\t | " << curr_similarities[5][1] << "\t | " << curr_similarities[5][2]<< "\t | " << curr_similarities[5][3]
+         << "\t | " << curr_similarities[5][4] << "\t | " << curr_similarities[5][5] << "\t | "<< endl;
+    cout << "----------------------------------------------------------" << endl;
+}
+
+void get_similarities(vector<vector<pair<int, float>>> &orders, vector<vector<int>> &similarities) {
+    vector<vector<int>> curr_similarities(6, vector<int>(6, 0));
+    for(int i = 0; i < orders.size(); i++) {
+        for(int row = 0; row < orders[i].size(); row++) {
+            for(int j = i; j < orders.size(); j++) {
+                if(orders[i][row].first == orders[j][row].first) {
+                    curr_similarities[i][j]++;
+                     similarities[i][j]++;
+                    if(i != j) {
+                        curr_similarities[j][i]++;
+                        similarities[j][i]++;
+                    } 
+                }
+            }    
+        }    
+    }
+    print_similarities(curr_similarities);
+}
+
+int main() {
+    vector<string> locations = {"./../Matrices/small/"};
+    vector<string> files;
+    get_filenames(files, locations);
+
+    /**
+     * For holding similarities, the order will be always as follows:
+     * 1) degree 1
+     * 2) degree 2
+     * 3) degree 3
+     * 4) closeness centrality
+     * 5) clustering coefficient
+     * 6) page rank
+     */
+    vector<vector<int>> similarities(6, vector<int>(6, 0));
+
+    cout << "files,sentiment,closeness" << endl;
+    for (int i = 0; i < files.size(); i++)
+    {   
+        vector<int> row_ptr, col_ind;
+        int num_nodes, num_edges;
+        read_graphs(files[i], num_nodes, num_edges, row_ptr, col_ind);
+        
+        vector<vector<pair<int, float>>> orders(6, vector<pair<int, float>>(num_nodes));
+		// degree_order(num_nodes, row_ptr, col_ind, orders[0]);
+		// degree_2_order(num_nodes, row_ptr, col_ind, orders[1]);
+		// degree_3_order(num_nodes, row_ptr, col_ind, orders[2]);
+		closeness_centrality(num_nodes, row_ptr, col_ind, orders[3]);
+		// clustering_coeff(num_nodes, row_ptr, col_ind, orders[4]);
+		// page_rank(num_nodes, row_ptr, col_ind, orders[5]);
+
+        // normalize(orders);
+
+        // // sort values to create permutations
+		// for (int i = 0; i < orders.size(); i++)
+		// {
+		// 	sort(orders[i].begin(), orders[i].end(), descending);
+		// }
+
+        // get_similarities(orders, similarities);
+
+        int colors = sentiment_1d_coloring(num_nodes, row_ptr, col_ind, orders[3]);
+        
+        sort(orders[3].begin(), orders[3].end(), descending);
+        int clos_colors = graph_1d_coloring(row_ptr, col_ind, orders[3]);
+
+        cout << files[i] << "," << colors << "," << clos_colors << endl;
+
+        // cout << "For the graph " << files[i] << endl
+        //      << " ----- Sentiment colors: " << colors << endl
+        //      << " ----- Closeness colors: " << clos_colors << endl;
+    }
+
+    // print_similarities(similarities);
+
     return 0;
 }
