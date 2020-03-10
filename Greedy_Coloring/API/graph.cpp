@@ -130,7 +130,7 @@ int graph_1d_coloring(const vector<int> &row_ptr, const vector<int> &col_ind, co
 	return nofcolors;
 }
 
-int sentiment_1d_coloring(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &spare_order)
+int saturation_1d_coloring(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &spare_order)
 {
 	vector<unordered_set<int>> color_infos(num_nodes);
 	vector<pair<int, int>> node_values(2, {1, 0});
@@ -179,7 +179,7 @@ int sentiment_1d_coloring(int num_nodes, const vector<int> &row_ptr, const vecto
 		colored_num++;
 
 // set of color of neighbors are arranged
-#pragma omp parallel for num_threads(32) schedule(guided)
+// #pragma omp parallel for num_threads(8) schedule(guided)
 		for (int edge = row_ptr[node.first]; edge < row_ptr[node.first + 1]; edge++)
 		{
 			hasEdge = true;
@@ -192,7 +192,7 @@ int sentiment_1d_coloring(int num_nodes, const vector<int> &row_ptr, const vecto
 		node_values[1].first = -1;
 		node_values[1].second = -9999;
 
-#pragma omp parallel for num_threads(32) schedule(guided)
+// #pragma omp parallel for num_threads(8) schedule(guided) 
 		for (int i = 0; i < num_nodes; i++)
 		{
 			if (node_colored[i])

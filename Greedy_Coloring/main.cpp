@@ -57,7 +57,7 @@ void get_similarities(vector<vector<pair<int, float>>> &orders, vector<vector<in
 }
 
 int main() {
-    vector<string> locations = {"./../Matrices/small/"};
+    vector<string> locations = {"./../Matrices/large/"};
     vector<string> files;
     get_filenames(files, locations);
 
@@ -72,18 +72,19 @@ int main() {
      */
     vector<vector<int>> similarities(6, vector<int>(6, 0));
 
-    cout << "files,sentiment,closeness" << endl;
-    for (int i = 0; i < files.size(); i++)
+    cout << "files,deg1,sentiment" << endl;
+    #pragma omp parallel for num_threads(8) schedule(guided)
+    for (int i = 10; i < files.size(); i++)
     {   
         vector<int> row_ptr, col_ind;
         int num_nodes, num_edges;
         read_graphs(files[i], num_nodes, num_edges, row_ptr, col_ind);
         
         vector<vector<pair<int, float>>> orders(6, vector<pair<int, float>>(num_nodes));
-		// degree_order(num_nodes, row_ptr, col_ind, orders[0]);
+		degree_order(num_nodes, row_ptr, col_ind, orders[0]);
 		// degree_2_order(num_nodes, row_ptr, col_ind, orders[1]);
 		// degree_3_order(num_nodes, row_ptr, col_ind, orders[2]);
-		closeness_centrality(num_nodes, row_ptr, col_ind, orders[3]);
+		// closeness_centrality(num_nodes, row_ptr, col_ind, orders[3]);
 		// clustering_coeff(num_nodes, row_ptr, col_ind, orders[4]);
 		// page_rank(num_nodes, row_ptr, col_ind, orders[5]);
 
@@ -97,12 +98,11 @@ int main() {
 
         // get_similarities(orders, similarities);
 
-        int colors = sentiment_1d_coloring(num_nodes, row_ptr, col_ind, orders[3]);
-        
-        sort(orders[3].begin(), orders[3].end(), descending);
-        int clos_colors = graph_1d_coloring(row_ptr, col_ind, orders[3]);
+        int colors = saturation_1d_coloring(num_nodes, row_ptr, col_ind, orders[0]);
+        sort(orders[0].begin(), orders[0].end(), descending);
+        int deg_colors = graph_1d_coloring(row_ptr, col_ind, orders[0]);
 
-        cout << files[i] << "," << colors << "," << clos_colors << endl;
+        cout << files[i] << "," << deg_colors << "," << colors  << endl;
 
         // cout << "For the graph " << files[i] << endl
         //      << " ----- Sentiment colors: " << colors << endl

@@ -42,6 +42,6 @@ void normal_params(vector<pair<int, float>> &order, float &mean, float &stdev);
 void normalize(vector<vector<pair<int, float>>> &orders, int num = -1);
 vector<pair<vector<int>, vector<int>>> random_ugraphs_generator(int graph_cnt, int node_cnt, int edge_cnt);
 
-int sentiment_1d_coloring(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & spare_order);
+int saturation_1d_coloring(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & spare_order);
 
 #endif
