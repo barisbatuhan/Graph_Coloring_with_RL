@@ -1,4 +1,4 @@
-#include "graph.h"
+#include "./graph.h"
 
 bool descending(const pair<int, float> &left, const pair<int, float> &right)
 {
@@ -27,12 +27,44 @@ bool isValid(const vector<int> &color_arr, const vector<int> &row_ptr, const vec
 {
 	for (int v = 0; v < num_nodes; v++)
 	{ // for each node v
+		if(color_arr[v] == -1) {
+			return false;
+		}
 		for (int e = row_ptr[v]; e < row_ptr[v + 1]; e++)
 		{
 			const int &adj = col_ind[e]; // for each adjacent of v
 			if (color_arr[adj] == color_arr[v])
 			{ // if color of v equals its adjacent's color
 				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool isValid2d(const vector<int> &color_arr, const vector<int> &row_ptr, const vector<int> &col_ind, int num_nodes)
+{
+	for (int v = 0; v < num_nodes; v++)
+	{ // for each node v
+		if(color_arr[v] == -1) {
+			return false;
+		}
+		for (int e = row_ptr[v]; e < row_ptr[v + 1]; e++)
+		{
+			const int &adj = col_ind[e]; // for each adjacent of v
+			if (color_arr[adj] == color_arr[v])
+			{ // if color of v equals its adjacent's color
+				return false;
+			}
+
+			for (int e2 = row_ptr[adj]; e2 < row_ptr[adj + 1]; e2++)
+			{
+				const int &adj_neigh = col_ind[e2]; // for each adjacent of v
+				if(adj_neigh == v) continue;
+				if (color_arr[adj_neigh] == color_arr[v])
+				{ // if color of v equals its adjacent's neighbor's color
+					return false;
+				}
 			}
 		}
 	}
@@ -135,6 +167,105 @@ int saturation_1d_coloring(int num_nodes, const vector<int> &row_ptr, const vect
 	vector<unordered_set<int>> color_infos(num_nodes);
 	vector<pair<int, int>> node_values(2, {1, 0});
 	vector<bool> node_colored(num_nodes, false);
+	// vector<int> node_colored_cnt(num_nodes, 0);
+
+	vector<int> color_arr(num_nodes, -1);
+	int nofcolors = 0;
+	bool hasEdge = false;
+	int colored_num = 0;
+
+	do
+	{
+		int i = 0;
+		pair<int, int> &node = node_values[i];
+		while (node_colored[node.first] == true)
+		{
+			node = node_values[++i];
+		}
+		pair<int, int> &next_node = node_values[i + 1];
+		if (next_node.first != -1 && next_node.second == node.second)
+		{
+			if (node_colored[next_node.first] != true)
+			{
+				if (spare_order[next_node.first] > spare_order[node.first])
+				{
+					node = next_node;
+				}
+			}
+		}
+
+		int color = 0;
+		for (; color < num_nodes; color++)
+		{ // greedily choose the smallest possible color
+			if (color_infos[node.first].find(color) == color_infos[node.first].end())
+			{
+				color_arr[node.first] = color;
+				if (nofcolors < color)
+				{
+					nofcolors = color;
+				}
+				break;
+			}
+		}
+
+		node_colored[node.first] = true;
+		colored_num++;
+
+// set of color of neighbors are arranged
+		for (int edge = row_ptr[node.first]; edge < row_ptr[node.first + 1]; edge++)
+		{
+			hasEdge = true;
+			const int &adj = col_ind[edge];
+			color_infos[adj].insert(color);
+			// node_colored_cnt[adj]++;
+		}
+		
+		node_values[0].first = -1;
+		node_values[0].second = -9999;
+		node_values[1].first = -1;
+		node_values[1].second = -9999;
+
+		for (int i = 0; i < num_nodes; i++)
+		{
+			if (node_colored[i])
+			{
+				continue;
+			}
+			int curr_colors = color_infos[i].size();
+			if(curr_colors > node_values[0].second) {
+				node_values[1].second = node_values[0].second;
+				node_values[1].first = node_values[0].first;
+				node_values[0].second = curr_colors;
+				node_values[0].first = i;
+			}
+			else if(curr_colors > node_values[1].second) {
+				node_values[1].second = curr_colors;
+				node_values[1].first = i;
+			}
+		}
+
+		// if (colored_num % 100 == 0)
+		// {
+		// 	cout << colored_num << " out of " << num_nodes << " finished!" << endl;
+		// }
+	} while (colored_num < num_nodes);
+
+	if (hasEdge)
+	{
+		nofcolors++;
+	}
+	if (!isValid(color_arr, row_ptr, col_ind, spare_order.size()) == true)
+	{
+		cout << "ERROR" << endl;
+	}
+	return nofcolors;
+}
+
+int saturation_2d_coloring(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &spare_order)
+{
+	vector<unordered_set<int>> color_infos(num_nodes);
+	vector<pair<int, int>> node_values(2, {1, 0});
+	vector<bool> node_colored(num_nodes, false);
 
 	vector<int> color_arr(num_nodes, -1);
 	int nofcolors = 0;
@@ -185,6 +316,12 @@ int saturation_1d_coloring(int num_nodes, const vector<int> &row_ptr, const vect
 			hasEdge = true;
 			const int &adj = col_ind[edge];
 			color_infos[adj].insert(color);
+			
+			for (int edge_2 = row_ptr[adj]; edge_2 < row_ptr[adj + 1]; edge_2++)
+			{
+				const int &adj_neigh = col_ind[edge_2];
+				color_infos[adj_neigh].insert(color);
+			}
 		}
 		
 		node_values[0].first = -1;
@@ -222,7 +359,7 @@ int saturation_1d_coloring(int num_nodes, const vector<int> &row_ptr, const vect
 	{
 		nofcolors++;
 	}
-	if (!isValid(color_arr, row_ptr, col_ind, spare_order.size()) == true)
+	if (!isValid2d(color_arr, row_ptr, col_ind, spare_order.size()) == true)
 	{
 		cout << "ERROR" << endl;
 	}
