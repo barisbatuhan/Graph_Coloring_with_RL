@@ -1,12 +1,11 @@
-#ifndef GRAPH_H
-#define GRAPH_H
+#ifndef GRAPH_HPP
+#define GRAPH_HPP
 
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <unordered_set>
-#include <queue>
 #include <numeric> // for accumulate
 #include <string>
 #include <dirent.h>
@@ -15,44 +14,88 @@
 #include <omp.h>
 #include <map>
 #include <iostream>
+#include "heap.h"
 
-using namespace std;
+class Graph
+{
+public:
+    // constructor
+    Graph(std::string fname);
+    Graph(int node_cnt, int edge_cnt); // random graph generation
 
-/* HELPER FUNCTIONS FOR PAIR OPERATIONS */
-bool descending(const pair<int, float> &left, const pair<int, float> &right);
-bool ascending(const pair<int, float> &left, const pair<int, float> &right);
-pair<int, float> add(const float &left, const pair<int, float> &right);
+    
+    // coloring methods
+    int color_1d(const std::vector<std::pair<int, float>> &ordering);
+    int color_2d(const std::vector<std::pair<int, float>> &ordering);
+    int color_dynamic_1d(bool random_start = false);
+    int color_dynamic_2d(bool random_start = false);
+    int color_saturation_1d(std::vector<std::pair<int, float>> &spare_order);
+    int color_saturation_2d(std::vector<std::pair<int, float>> &spare_order);
 
-/* READ & WRITE OPERATIONS */
-void get_filenames(vector<string> &filenames, const vector<string> &locations); // gets <path>/<filenames> from folders specified with locations parameter
-int read_graphs(string &fname, int &num_nodes, int &num_edges, vector<int> &row_ptr, vector<int> &col_ind);
-string read_family(string &fname);
+    
+    // coloring validity checkers
+    bool is_valid_1d(const std::vector<int> &color_arr);
+    bool is_valid_2d(const std::vector<int> &color_arr);
 
-/* COLORING FUNCTIONS */
-int graph_1d_coloring(const vector<int> &row_ptr, const vector<int> &col_ind, const vector<pair<int, float>> &ordering);
-int graph_2d_coloring(const vector<int> &row_ptr, const vector<int> &col_ind, const vector<pair<int, float>> &ordering);
-int saturation_1d_coloring(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & spare_order);
-int saturation_2d_coloring(int num_nodes, const vector<int> & row_ptr, const vector<int> & col_ind, vector<pair<int, float>> & spare_order);
+    
+    // ordering methods
+    void degree_order(std::vector<std::pair<int, float>> &ordering);
+    void degree_order(std::vector<float> &ordering);
 
-/* COLORING VALIDITY CHECKERS */
-bool isValid(const vector<int> &color_arr, const vector<int> &row_ptr, const vector<int> &col_ind, int num_nodes);
-bool isValid2d(const vector<int> &color_arr, const vector<int> &row_ptr, const vector<int> &col_ind, int num_nodes);
+    void degree_2_order(std::vector<std::pair<int, float>> &ordering);
+    void degree_2_order(std::vector<float> &ordering);
 
-/* ORDERING ALGORITHMS */
-void degree_order(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering);
-void degree_2_order(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering);
-void degree_3_order(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering);
-void closeness_centrality(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering);
-void closeness_centrality_approx(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering, int size = 100);
-void clustering_coeff(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering);
-void page_rank(int num_nodes, const vector<int> &row_ptr, const vector<int> &col_ind, vector<pair<int, float>> &ordering, int iter = 20, float alpha = 0.85);
+    void degree_3_order(std::vector<std::pair<int, float>> &ordering);
+    void degree_3_order(std::vector<float> &ordering);
 
-/* HELPER FUNCTIONS FOR ORDERING ALGORITHMS */
-void bfs(int start_node, int num_nodes, vector<int> row_ptr, vector<int> col_ind, vector<int> &distance_arr, int step_size = INT_MAX);
-void normal_params(vector<pair<int, float>> &order, float &mean, float &stdev);
-void normalize(vector<vector<pair<int, float>>> &orders, int num = -1);
+    void closeness_centrality(std::vector<std::pair<int, float>> &ordering);
+    void closeness_centrality(std::vector<float> &ordering);
 
-/* DATASET ENLARGING METHODS */
-vector<pair<vector<int>, vector<int>>> random_ugraphs_generator(int graph_cnt, int node_cnt, int edge_cnt);
+    void closeness_centrality_approx(std::vector<std::pair<int, float>> &ordering, int size = 100);
+    void closeness_centrality_approx(std::vector<float> &ordering, int size = 100);
+
+    void clustering_coeff(std::vector<std::pair<int, float>> &ordering);
+    void clustering_coeff(std::vector<float> &ordering);
+
+    void page_rank(std::vector<std::pair<int, float>> &ordering, int iter = 20, float alpha = 0.85);
+    void page_rank(std::vector<float> &ordering, int iter = 20, float alpha = 0.85);
+
+    
+    // helper methods
+    void bfs(int start_node, std::vector<int> &distance_arr, int step_size = INT_MAX);
+
+    
+    // printing graph
+    void print_graph();
+
+    
+    // static methods
+    static void normalize(std::vector<std::vector<std::pair<int, float>>> &orders, int num = -1);
+    static bool descending(const std::pair<int, float> &left, const std::pair<int, float> &right);
+    static bool ascending(const std::pair<int, float> &left, const std::pair<int, float> &right);
+    
+    std::vector<int> row_ptr;
+    std::vector<int> col_ind;
+    int num_nodes;
+    int num_edges;
+
+private:
+    std::string family;
+    std::string relative_path;
+
+    // static helper methods
+    static void normal_params(std::vector<std::pair<int, float>> &ordering, float &mean, float &stdev);
+    static std::pair<int, float> add(const float &left, const std::pair<int, float> &right);
+};
+
+
 
 #endif
+
+
+void normalize(vector<float> & g_s);
+void transpose(vector<vector<float>> & node_embeddings);
+void initialize_node_embeddings(Graph & g, vector<vector<float>> & node_embeddings);
+void update_node_embeddings(Graph & g, vector<vector<float>> & node_embeddings, int latest_colored_node, int latest_color);
+void initialize_graph_state(Graph & g, vector<float> & g_s);
+void update_graph_state(Graph & g, vector<float> & graph_state, unordered_set<int> & sol_set);
