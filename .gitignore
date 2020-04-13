@@ -19,3 +19,7 @@ Matrices/large/*
 
 # OS icons
 desktop.ini
+
+# Personal Working Folders
+./Temp/
+./Temp/*/*.*

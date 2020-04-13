@@ -17,5 +17,3 @@ Reinforcement learning algorithm that deals with an accurate solution for graph 
 - *Matrices* has 2 foldes: small and large. THe graphs are stored in these folders with respect to their sizes. 
 
 - *Csv* includes all the ordering and coloring results we have found so far.
-
-
