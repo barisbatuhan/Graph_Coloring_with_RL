@@ -61,7 +61,8 @@ class DoubleQNet():
                 total_graph_index += 1
                 if(total_graph_index % len(graph_names) == 0):
                     total_graph_index = 0
-            
+                
+                self.graph.reset()
             # TO DO: UPDATE TARGET NETWORK
 
     def get_max_action(colored_info_arr):

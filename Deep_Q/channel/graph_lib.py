@@ -17,10 +17,11 @@ class Graph_Lib(object):
         self.lib.init_node_embeddings.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))
         self.lib.init_graph_embeddings.argtypes = []
         self.lib.init_graph_embeddings.restype = ctypes.POINTER(ctypes.c_float)
+        # resetting function for heap memory
+        self.lib.reset.argtypes = []
         # batch embedding functions
         self.lib.initialize_graph_embeddings_for_batch.argtypes = []
         self.lib.initialize_graph_embeddings_for_batch.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))
-
 
     def print_graphs(self):
         self.lib.print_graph_features()
@@ -47,3 +48,6 @@ class Graph_Lib(object):
     def init_graph_embeddings(self):
         res = self.lib.init_graph_embeddings()
         return res
+    
+    def reset(self):
+        self.lib.reset()
