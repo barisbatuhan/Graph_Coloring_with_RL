@@ -10,7 +10,7 @@ if __name__ == '__main__':
     learning_rate = 0.01
     discount_rate = 0.001
     discount_count = 10
-    batch_size = 32
+    batch_size = 1
     input_size = 25
     epochs = 1
     

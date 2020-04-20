@@ -359,11 +359,11 @@ int Graph::color_1d(const std::vector<std::pair<int, float>> &ordering)
     bool hasEdge = false;
     for (int i = 0; i < (int)ordering.size(); i++)
     {
-        const int &node = ordering[i].first; //for each node in ordering
+        const int &node = ordering[i].first; // for each node in ordering
         for (int edge = row_ptr[node]; edge < row_ptr[node + 1]; edge++)
         {
             hasEdge = true;
-            const int &adj = col_ind[edge]; //for each adjacent node
+            const int &adj = col_ind[edge]; // for each adjacent node
             if (color_arr[adj] != -1)
             {                                      // if it is already colored
                 forbid_arr[color_arr[adj]] = node; // that color is forbidden to node
@@ -1241,10 +1241,6 @@ COMMUNICATING FUNCTIONS
 
 std::vector<Graph> graphs;
 
-Graph curr_graph;
-float** node_embed;
-float* graph_embed;
-
 // helper methods
 extern "C" void normalize(vector<float> & g_s);
 extern "C" void transpose(vector<vector<float>> & node_embeddings);
@@ -1255,8 +1251,8 @@ extern "C" void initialize_node_embeddings(Graph & g, vector<vector<float>> & no
 extern "C" void initialize_graph_state(Graph & g, vector<float> & g_s);
 
 // update
-extern "C" void update_node_embeddings(Graph & g, vector<vector<float>> & node_embeddings, int latest_colored_node, int latest_color);
-extern "C" void update_graph_state(Graph & g, vector<float> & graph_state, unordered_set<int> & sol_set);
+// extern "C" void update_node_embeddings(Graph & g, vector<vector<float>> & node_embeddings, int latest_colored_node, int latest_color);
+// extern "C" void update_graph_state(Graph & g, vector<float> & graph_state, unordered_set<int> & sol_set);
 
 // pseudo normalization
 void normalize(vector<float> & g_s) {
@@ -1291,12 +1287,25 @@ vector<float> concatenate(vector<float> & first, vector<float> & second) {
 
 /* --------------------------------------------------------------------------------------------------- */
 
+Graph curr_graph;
+float** node_embed;
+float* graph_embed;
+std::vector<int> color_arr;
+
 extern "C" void reset() {
     for(int i = 0; i < 9; i++) {
         delete[] node_embed[i];
     }
     delete[] graph_embed;
     curr_graph = Graph();
+}
+
+extern "C" int read_graph(char* graph_name){
+    Graph g(graph_name);
+    curr_graph = g;
+    graphs.push_back(g);
+    color_arr = std::vector<int>(g.num_nodes, -1);
+    return g.num_nodes;
 }
 
 extern "C" float** init_node_embeddings() {
@@ -1366,77 +1375,130 @@ extern "C" float* init_graph_embeddings() {
     return graph_embed;
 }
 
-// extern "C" float** update_node_embeddings(int latest_colored_node) {
-//     auto & row_ptr = curr_graph.row_ptr;
-//     auto & col_ind = curr_graph.col_ind; 
-// 	for(int edge = row_ptr[latest_colored_node]; edge < row_ptr[latest_colored_node+1]; edge++){
-//         int adj = col_ind[edge];
-//         node_embed[adj][6]++;
-//         if(latest_color > node_embed[adj][7]){
-//             node_embed[adj][7] = latest_color;
-//         }
-//     }
-//     node_embed[latest_colored_node][8] = 1;
-//     return node_embed;
-// }
+extern "C" int color_node(int node) {
+    std::vector<int> forbid_arr(curr_graph.num_nodes, -1);
+    for (int edge = curr_graph.row_ptr[node]; edge < curr_graph.row_ptr[node + 1]; edge++)
+    {
+        const int &adj = curr_graph.col_ind[edge];
+        if (color_arr[adj] != -1) forbid_arr[color_arr[adj]] = node; 
+    }
+    int color = 0;
+    for (; color < curr_graph.num_nodes; color++)
+    {
+        if (forbid_arr[color] != node)
+        {
+            color_arr[node] = color;
+            break;
+        }
+    }
+    return color;
+}
 
-// extern "C" float** update_graph_embeddings() {
-//     auto & row_ptr = curr_graph.row_ptr;
-// 	auto & col_ind = curr_graph.col_ind;
-//     int size = curr_graph.num_nodes;
-//     vector<float> closeness;
-//     curr_graph.closeness_centrality_approx(closeness);
+extern "C" float** update_node_embeddings(int node, int color) {
+	for(int edge = curr_graph.row_ptr[node]; edge < curr_graph.row_ptr[node + 1]; edge++){
+        int adj = curr_graph.col_ind[edge];
+        node_embed[6][adj] += 1;
+        if(color > node_embed[7][adj]){
+            node_embed[6][adj] = color;
+        }
+    }
+    node_embed[8][node] = 1;
+    return node_embed;
+}
 
-// 	double degree_mean = (double)row_ptr.back() / size;
-// 	double colored_degree_sum = 0;
-// 	double colored_degree_sq_sum = 0;
-// 	double uncolored_degree_sum = 0;
-// 	double uncolored_degree_sq_sum = 0;                                  
-// 	graph_embed[2] = 0;                                                 // nof adjacents of colored nodes
-// 	graph_embed[3] = 0;                                                 // nof colored adjacents of colored nodes
-// 	graph_embed[4] = 0;                                                 // closeness sum of colored nodes
-// 	graph_embed[6] = accumulate(closeness.begin(), closeness.end(), 0); // closeness sum of uncolored nodes
-// 	graph_embed[8] = 0;                                                 // degree above mean (among colored nodes)
-// 	graph_embed[9] = 0;                                                 // degree below mean (among colored nodes)
-// 	graph_embed[10] = 0;                                                // degree above mean (among uncolored nodes)
-// 	graph_embed[11] = 0;                                                // degree below mean (among uncolored nodes)
-// 	for (int v = 0; v < size; v++) {
-// 		int degree = row_ptr[v + 1] - row_ptr[v];
-// 		if (sol_set.find(v) != sol_set.end()) {
-// 			colored_degree_sum += degree;
-// 			colored_degree_sq_sum += degree*degree;
-// 			graph_embed[2] += degree;
-// 			if (degree > degree_mean) {
-// 				graph_embed[8] ++;
-// 				graph_embed[10] --;
-// 			}
-// 			else {
-// 				graph_embed[9] ++;
-// 				graph_embed[11] --;
-// 			}
+void update_degree_values(){
+    double degree_mean = (double) curr_graph.row_ptr.back() / curr_graph.num_nodes;
+    double uncolored_degree_sq_sum = 0;
+    double colored_degree_sq_sum = 0;
+    int colored_degree_sum = 0;
+    int colored_size = 0;
+    int uncolored_degree_sum = 0;
+    int uncolored_size = 0;
+    graph_embed[8] = 0;
+    graph_embed[9] = 0;
+    graph_embed[10] = 0;
+    graph_embed[11] = 0;
+    graph_embed[12] = 0;                                                // mean degree of colored nodes
+	graph_embed[13] = 0;
+    graph_embed[14] = 0;
+    graph_embed[15] = 0;
+    
+    for (int v = 0; v < curr_graph.num_nodes; v++) {
+        int degree = curr_graph.row_ptr[v + 1] - curr_graph.row_ptr[v];
+        if (color_arr[v] != -1) {
+        
+            if (degree > degree_mean) {
+                graph_embed[8]++;
+            }
+            else {
+                graph_embed[9]++;
+            }
+            colored_degree_sq_sum += degree * degree;
+            colored_degree_sum += degree;
+            colored_size++;
+        }
+    
+        else if (color_arr[v] == -1) {
+        
+            if (degree > degree_mean) {
+                graph_embed[10]++;
+            }
+            else {
+            graph_embed[11]++;
+            }
+            uncolored_degree_sq_sum += degree * degree;
+            uncolored_degree_sum += degree;
+            uncolored_size++;
+        }
+    }
+    graph_embed[12] = (double) colored_degree_sq_sum / colored_size;
+    graph_embed[13] = (double) uncolored_degree_sq_sum / uncolored_size;
+    graph_embed[14] = (double) colored_degree_sq_sum / curr_graph.num_nodes - (degree_mean * degree_mean);
+    graph_embed[15] = (double) uncolored_degree_sq_sum / curr_graph.num_nodes - (degree_mean * degree_mean);
+} 
 
-// 			for (int edge = row_ptr[v]; edge < row_ptr[v + 1]; edge++) {
-// 				int adj = col_ind[edge];
-// 				if (sol_set.find(adj) != sol_set.end()) {
-// 					graph_embed[3]++;
-// 				}
-// 			}
-// 			graph_embed[4] += closeness[v];
-// 			graph_embed[6] -= closeness[v];
-// 		}
-// 		else {
-// 			uncolored_degree_sum += degree;
-// 			uncolored_degree_sq_sum += degree*degree;
-// 		}
-// 	}
-// 	graph_embed[5] = sol_set.size();
-// 	graph_embed[7] = size - sol_set.size();
-// 	graph_embed[12] = colored_degree_sum / (sol_set.size() + 1);
-// 	graph_embed[13] = uncolored_degree_sum / (size - sol_set.size());
-// 	graph_embed[14] = colored_degree_sq_sum / sol_set.size() - (graph_embed[12] * graph_embed[12]);
-// 	graph_embed[15] = uncolored_degree_sq_sum / (size - sol_set.size()) - (graph_embed[13] * graph_embed[13]);
-// 	normalize(graph_embed);
-// }
+void update_closeness_values() {
+    vector<float> closeness;
+    curr_graph.closeness_centrality_approx(closeness);
+    int uncolored_sum = 0;
+    int colored_sum = 0;
+    for(int v = 0; v < (int) closeness.size(); v++) {
+        if(color_arr[v]) {
+            colored_sum += closeness[v];
+        } else {
+            uncolored_sum += closeness[v];
+        }
+    }
+    graph_embed[4] = colored_sum;
+    graph_embed[6] = uncolored_sum;
+}
+
+void update_adj_values() {
+    std::unordered_set<int> adj_of_colored;
+    std::unordered_set<int> colored_adj_of_colored;
+    
+    for(int v = 0; v < (int) color_arr.size(); v++) {
+        if(color_arr[v] == -1) continue;
+        for(int u = curr_graph.row_ptr[v]; u < curr_graph.row_ptr[v + 1]; u++) {
+            int &adj = curr_graph.col_ind[u];
+            if(color_arr[adj] != -1) {
+                colored_adj_of_colored.insert(adj);
+            }
+            adj_of_colored.insert(adj);
+        }
+    }
+    graph_embed[2] = adj_of_colored.size();
+    graph_embed[3] = colored_adj_of_colored.size();
+}
+
+extern "C" float* update_graph_embeddings() {
+    graph_embed[7] += -1;
+    graph_embed[5] += 1;
+    update_degree_values();
+    update_closeness_values();
+    update_adj_values();
+    return graph_embed;
+}
 
 /* --------------------------------------------------------------------------------------------------- */
 
@@ -1475,7 +1537,7 @@ void initialize_graph_state(Graph & g, vector<float> & g_s) {
 	g_s[3] = 0;                                                 // nof colored adjacents of colored nodes
 	g_s[4] = 0;                                                 // closeness sum of colored nodes
 	g_s[5] = 0;                                                 // nof colored nodes
-    for(int i=0; i<(int)closeness.size(); i++){                      // closeness sum of uncolored nodes
+    for(int i=0; i<(int)closeness.size(); i++){                 // closeness sum of uncolored nodes
         g_s[6] += closeness[i];
     }
 	g_s[7] = size;                                              // nof uncolored nodes
@@ -1582,13 +1644,6 @@ void update_graph_state(Graph & g, vector<float> & graph_state, unordered_set<in
 extern "C" void insert_graph(int n, int e){
     Graph g(n, e);
     graphs.push_back(g);
-}
-
-extern "C" int read_graph(char* graph_name){
-    Graph g(graph_name);
-    curr_graph = g;
-    graphs.push_back(g);
-    return g.num_nodes;
 }
 
 extern "C" void print_graph_features(){

@@ -52,11 +52,21 @@ class DoubleQNet():
                 num_nodes = self.graph.read_graph(graph_name)
                 colored_arr = [False]*num_nodes # node count will be placed here
                 # reading node embeddings
-                node_embeds = self.graph.init_node_embeddings()
+                node_embeds = self.graph.init_node_embeddings(num_nodes)
                 graph_embeds = self.graph.init_graph_embeddings()
+                graph_embeds = graph_embeds[0:16]
                 colored_cnt = 0
                 while colored_cnt < num_nodes:
-                    # TO DO: CHOOSE NODE TO COLOR AND UPDATE EMBEDDINGS
+                    # TO DO: ADD ALL THE PROCESSES FOR CHOOSING THE NODE TO COLOR
+                    node_to_color = 0 # TO DO: CHANGE IT AND SELECT THE NODE CORRECTLY
+                    selected_color = self.graph.color_node(node_to_color)
+                    colored_cnt +=1
+                    colored_arr[node_to_color] = True
+                    node_embeds = self.graph.update_node_embeddings(node_to_color, selected_color, num_nodes)
+                    # graph_embeds = self.graph.update_graph_embeddings()
+                    if(colored_cnt % 3 == 0):
+                        graph_embeds = self.graph.update_graph_embeddings()
+                    # TO DO: UPDATE LOCAL QNET
                     break
                 total_graph_index += 1
                 if(total_graph_index % len(graph_names) == 0):
