@@ -1,5 +1,14 @@
 # IDE related files:
 .vscode
+*/.vscode
+
+# Language Related Files
+*/__pycache__
+*/*/__pycache__
+*/*.pyc
+*/*/*.pyc
+*/*.gch.h
+*/*/*.gch.h
 
 # Executables
 */*.out
