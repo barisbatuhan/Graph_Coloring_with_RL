@@ -11,7 +11,7 @@ if __name__ == '__main__':
     discount_rate = 0.001
     discount_count = 10
     batch_size = 1
-    input_size = 25
+    input_size = 24
     epochs = 1
     
     # object initialization

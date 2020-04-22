@@ -28,7 +28,7 @@ class Graph_Lib(object):
         # updating embeddings
         self.lib.update_node_embeddings.argtypes = [ctypes.c_int, ctypes.c_int]
         self.lib.update_node_embeddings.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))
-        self.lib.update_graph_embeddings.argtypes = []
+        self.lib.update_graph_embeddings.argtypes = [ctypes.c_int]
         self.lib.update_graph_embeddings.restype = ctypes.POINTER(ctypes.c_float)
         # resetting function for heap memory
         self.lib.reset.argtypes = []
@@ -60,7 +60,7 @@ class Graph_Lib(object):
     
     def init_graph_embeddings(self):
         embeds = self.lib.init_graph_embeddings()
-        return embeds[0:16]
+        return embeds[0:15]
     
     def color_node(self, node):
         return self.lib.color_node(node)
@@ -72,9 +72,9 @@ class Graph_Lib(object):
             embeds[i] = embeds[i][0:num_nodes]
         return embeds
 
-    def update_graph_embeddings(self):
-        embeds = self.lib.update_graph_embeddings()
-        return embeds[0:16]
+    def update_graph_embeddings(self, node):
+        embeds = self.lib.update_graph_embeddings(node)
+        return embeds[0:15]
     
     def reset(self):
         self.lib.reset()
