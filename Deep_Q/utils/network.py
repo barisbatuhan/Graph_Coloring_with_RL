@@ -20,6 +20,7 @@ class QNet(nn.Module):
         self.fc1 = nn.Linear(input_dims, self.hidden_layer_neurons)
         self.fc2 = nn.Linear(self.hidden_layer_neurons, 1)
         self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
+        self.loss = nn.MSELoss()
 
     def forward(self, state):
         fc1 = F.relu(self.fc1(state))
@@ -39,9 +40,8 @@ class DoubleQNet():
         self.target_qnet = QNet(input_dims, learning_rate)
         # network parameters
         # communication with C++ codes
-        self.graphs = []
 
-    def train(self, epochs, batch_size, graph_names):
+    def train(self, epochs, batch_size):
         init_lr = self.learning_rate
         total_graph_index = 0
 
@@ -49,53 +49,23 @@ class DoubleQNet():
             batch = 64
             n, e = 50, 100
             for cnt in range(batch):
-                graph = Graph_Lib()
-                graph.insert_new_graph(n, e) # insert değiştir
-                self.graphs.append([graph, n])
-            # normalize all the graph node_embeddings
-            # her graphs içinde graph embeddings
-            for graph in self.graphs:
-                num_nodes =
-                node_embeds = self.graph.init_node_embeddings(num_nodes)
-                graph_embeds = self.graph.init_graph_embeddings()
-
-
-
-                # reading the graph
-                graph_name = graph_names[total_graph_index]
-                num_nodes = self.graph.read_graph(graph_name)
-                colored_arr = [False]*num_nodes # node count will be placed here
-                # reading node embeddings
-                node_embeds = self.graph.init_node_embeddings(num_nodes)
-                graph_embeds = self.graph.init_graph_embeddings()
-                colored_cnt = 0
-                while colored_cnt < num_nodes:
-                    # TO DO: ADD ALL THE PROCESSES FOR CHOOSING THE NODE TO COLOR
-                    node_to_color = 0 # TO DO: CHANGE IT AND SELECT THE NODE CORRECTLY
-                    selected_color = self.graph.color_node(node_to_color)
-                    colored_cnt +=1
-                    colored_arr[node_to_color] = True
-                    node_embeds = self.graph.update_node_embeddings(node_to_color, selected_color, num_nodes)
-                    # graph_embeds = self.graph.update_graph_embeddings()
+                graphs = Graph_Lib()
+                graphs.insert_batch(batch, n, e)
+                num_nodes = n
+                graphs.init_node_embeddings()
+                graphs.init_graph_embeddings()
+                colored_arrs = [[False]*num_nodes]*batch
+                for colored_cnt in range(num_nodes):
+                    nodes_to_color = decide_node_coloring(graphs, num_nodes, batch)
+                    graphs.color_batch(nodes_to_color)
+                    # update network
                     if(colored_cnt % 3 == 0):
-                        graph_embeds = self.graph.update_graph_embeddings(node_to_color)
-                    # TO DO: UPDATE LOCAL QNET
-                    break
-                total_graph_index += 1
-                if(total_graph_index % len(graph_names) == 0):
-                    total_graph_index = 0
+                        graph_embeds = graphs.update_graph_embeddings()
+                    pass
 
-                self.graph.reset()
-            # TO DO: UPDATE TARGET NETWORK
+                graph.reset_batch()
 
-    def get_max_action(colored_info_arr):
-        max_action = -1
-        max_val = -1
-        for node in range(colored_info_arr):
-            if(colored_info_arr[node] == True): # already colored node
-                continue
-            val = self.target_qnet.eval() + self.local_qnet.eval()
-            if(val > max_val):
-                max_val = val
-                max_action = node
-        return max_action
+    def decide_node_coloring(self, graphs, num_nodes, batch):
+        for el in range(batch):
+
+        pass

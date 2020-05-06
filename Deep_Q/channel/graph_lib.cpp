@@ -257,36 +257,43 @@ extern "C" void update_graph_embeddings() {
   }
 }
 
-int color_graph(int index, int node) {
+void color_graph(int index, int node, int &color) {
   auto &curr_graph = graphs[index];
   auto &color_arr = color_arrs[index];
+  int n = node;
+
+  // for(unsigned int i = 0; i < curr_graph.row_ptr.size() - 1; i++) {
+  //   cout << "For node: " << i << " Adjs: ";
+  //   for(int edge = curr_graph.row_ptr[i]; edge < curr_graph.row_ptr[i + 1]; edge++) {
+  //     cout << curr_graph.col_ind[edge] << ", ";
+  //   }
+  //   cout << endl;
+  // }
 
   std::vector<int> forbid_arr(curr_graph.num_nodes, -1);
-  for (int edge = curr_graph.row_ptr[node]; edge < curr_graph.row_ptr[node + 1]; edge++)
+  for (int edge = curr_graph.row_ptr[n]; edge < curr_graph.row_ptr[n + 1]; edge++)
   {
-    const int &adj = curr_graph.col_ind[edge];
-    if (color_arr[adj] != -1) forbid_arr[color_arr[adj]] = node;
+    int &adj = curr_graph.col_ind[edge];
+    if (color_arr[adj] != -1) forbid_arr[color_arr[adj]] = n;
   }
-  int color = 0;
   for (; color < curr_graph.num_nodes; color++)
   {
-    if (forbid_arr[color] != node)
+    if (forbid_arr[color] != n)
     {
-      color_arr[node] = color;
+      color_arr[n] = color;
       break;
     }
   }
-  return color;
 }
 
 extern "C" int* color_batch(int *nodes, int* size) {
-  int* colors = new int[graphs.size()];
+  vector<int> colors(graphs.size(), 0);
   *size = graphs.size();
   for(unsigned int i = 0; i < graphs.size(); i++) {
-    colors[i] = color_graph(i, nodes[i]);
-    update_node_embed(i, nodes[i], colors[i]);
+    color_graph(i, *(nodes + i), colors[i]);
+    update_node_embed(i, *(nodes + i), colors[i]);
   }
-  return colors;
+  return colors.data();
 }
 
 /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */

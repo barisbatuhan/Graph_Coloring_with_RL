@@ -27,7 +27,7 @@ from channel.graph_lib import Graph_Lib
 
 g = Graph_Lib()
 
-g.insert_batch(32, 8, 12)
+g.insert_batch(32, 5, 10)
 print("INITIALIZING NODE EMBEDS...")
 g.init_node_embeddings()
 print("INITIALIZING FINISHED...")
@@ -37,12 +37,22 @@ ne, r, c = g.get_node_embed(17)
 print("GETTING FINISHED...")
 ge, s = g.get_graph_embed(31)
 
-print("PRINTING NODE EMBEDS")
+nodes_to_color = [4]*32
+print("COLORING...")
+g.color_batch(nodes_to_color)
+print("UPDATING GRAPH EMBEDS...")
+g.update_graph_embeddings()
+print("GETTING NODE EMBEDS...")
+ne, r, c = g.get_node_embed(17)
+print("GETTING FINISHED...")
+ge, s = g.get_graph_embed(31)
 
-for i in range(r):
-    for j in range(c):
-        print(ne[i][j])
-
+# print("PRINTING NODE EMBEDS")
+#
+# for i in range(r):
+#     for j in range(c):
+#         print(ne[i][j])
+#
 print("PRINTING GRAPH EMBEDS...")
 
 for k in range(s):

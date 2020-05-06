@@ -56,7 +56,8 @@ class Graph_Lib(object):
 
     def color_batch(self, nodes):
         a = ctypes.c_int(0)
-        res = self.lib.get_graph_embed(nodes, ctypes.byref(a))
+        start = (ctypes.c_int * len(nodes))(*nodes)
+        res = self.lib.color_batch(start, ctypes.byref(a))
         return (res, a.value)
 
     # def initialize_graph_embeddings_for_batch(self):
