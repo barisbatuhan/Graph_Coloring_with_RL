@@ -8,8 +8,8 @@ import numpy as np
 from channel.graph_lib import Graph_Lib
 
 class QNet(nn.Module):
-    
-    def __init__(self, input_dims):
+
+    def __init__(self, input_dims, lr):
         super(QNet, self).__init__()
         # gpu or cpu set
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
@@ -19,14 +19,15 @@ class QNet(nn.Module):
         # layers
         self.fc1 = nn.Linear(input_dims, self.hidden_layer_neurons)
         self.fc2 = nn.Linear(self.hidden_layer_neurons, 1)
+        self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
 
     def forward(self, state):
         fc1 = F.relu(self.fc1(state))
-        action = F.sigmoid(self.fc2(fc1))
+        action = self.fc2(fc1)
         return action
 
 class DoubleQNet():
-    
+
     def __init__(self, input_dims, learning_rate, discount_rate, discount_count):
         # learning parameters
         self.learning_rate = learning_rate
@@ -34,19 +35,32 @@ class DoubleQNet():
         self.discount_count = discount_count
         self.step_counter = 0
         # networks
-        self.local_qnet = QNet(input_dims)
-        self.target_qnet = QNet(input_dims)
+        self.local_qnet = QNet(input_dims, learning_rate)
+        self.target_qnet = QNet(input_dims, learning_rate)
         # network parameters
-        self.optimizer = optim.RMSprop(self.local_qnet.parameters(), lr=self.learning_rate)
         # communication with C++ codes
-        self.graph = Graph_Lib()
+        self.graphs = []
 
-    def train(self, epochs, batch_size, graph_names): 
-        init_lr = self.learning_rate      
+    def train(self, epochs, batch_size, graph_names):
+        init_lr = self.learning_rate
         total_graph_index = 0
-        
-        for epoch in range(epochs):   
-            for batch in range(batch_size):
+
+        for epoch in range(epochs):
+            batch = 64
+            n, e = 50, 100
+            for cnt in range(batch):
+                graph = Graph_Lib()
+                graph.insert_new_graph(n, e) # insert değiştir
+                self.graphs.append([graph, n])
+            # normalize all the graph node_embeddings
+            # her graphs içinde graph embeddings
+            for graph in self.graphs:
+                num_nodes =
+                node_embeds = self.graph.init_node_embeddings(num_nodes)
+                graph_embeds = self.graph.init_graph_embeddings()
+
+
+
                 # reading the graph
                 graph_name = graph_names[total_graph_index]
                 num_nodes = self.graph.read_graph(graph_name)
@@ -70,7 +84,7 @@ class DoubleQNet():
                 total_graph_index += 1
                 if(total_graph_index % len(graph_names) == 0):
                     total_graph_index = 0
-                
+
                 self.graph.reset()
             # TO DO: UPDATE TARGET NETWORK
 
