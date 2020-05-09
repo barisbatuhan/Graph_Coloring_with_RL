@@ -1,9 +1,10 @@
 import os
-import torch as T
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
+import random
 
 from channel.graph_lib import Graph_Lib
 
@@ -12,7 +13,7 @@ class QNet(nn.Module):
     def __init__(self, input_dims, lr):
         super(QNet, self).__init__()
         # gpu or cpu set
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
         # network parameters
         self.hidden_layer_neurons = 512
@@ -26,46 +27,124 @@ class QNet(nn.Module):
         fc1 = F.relu(self.fc1(state))
         action = self.fc2(fc1)
         return action
-
+    
+    def save_model(self, path):
+        torch.save(self.state_dict(), path)
+    
+    def load_model(self, path):
+        self.load_state_dict(torch.load(path))
+    
 class DoubleQNet():
 
-    def __init__(self, input_dims, learning_rate, discount_rate, discount_count):
+    def __init__(self, input_dims, learning_rate, load_path=None):
         # learning parameters
         self.learning_rate = learning_rate
-        self.discount_rate = discount_rate
-        self.discount_count = discount_count
         self.step_counter = 0
+        self.gamma = 0.9
+        self.epsilon = 1
+        self.epsilon_decay = 0.999
         # networks
         self.local_qnet = QNet(input_dims, learning_rate)
         self.target_qnet = QNet(input_dims, learning_rate)
-        # network parameters
-        # communication with C++ codes
+
+        if(load_path != None):
+            self.local_qnet.load_model(load_path + 'local_qnet.params')
+            self.target_qnet.load_model(load_path + 'target_qnet.params')
 
     def train(self, epochs, batch_size):
-        init_lr = self.learning_rate
-        total_graph_index = 0
-
-        for epoch in range(epochs):
-            batch = 64
+        batch = batch_size
+        for epoch in range(1, epochs):
+            loss_total = 0
             n, e = 50, 100
-            for cnt in range(batch):
-                graphs = Graph_Lib()
-                graphs.insert_batch(batch, n, e)
-                num_nodes = n
-                graphs.init_node_embeddings()
-                graphs.init_graph_embeddings()
-                colored_arrs = [[False]*num_nodes]*batch
-                for colored_cnt in range(num_nodes):
-                    nodes_to_color = decide_node_coloring(graphs, num_nodes, batch)
-                    graphs.color_batch(nodes_to_color)
-                    # update network
-                    if(colored_cnt % 3 == 0):
-                        graph_embeds = graphs.update_graph_embeddings()
-                    pass
+            graphs = Graph_Lib()
+            graphs.insert_batch(batch, n, e)
+            num_nodes = n
+            graphs.init_node_embeddings()
+            graphs.init_graph_embeddings()
+            colored_arrs = np.full((batch, num_nodes), False, dtype=bool)
+            max_colors = [-1]*batch
+            
+            for colored_cnt in range(num_nodes):
+                actions, q_pred = self.decide_node_coloring(graphs, num_nodes, batch, colored_arrs)
+                colors = graphs.color_batch(actions)
+                rewards = self.get_rewards(batch, colors, max_colors)
+                q_target = self.get_loss(graphs, batch, rewards, actions)
+                # print(np.linalg.norm(q_target.detach().numpy() - q_pred.detach().numpy()))
+                loss = self.local_qnet.loss(q_target, q_pred).to(self.local_qnet.device)
+                loss.backward()
+                loss_total += loss
+                self.local_qnet.optimizer.step()
+                self.step_counter += 1
+                if(colored_cnt % 3 == 0):
+                   graphs.update_graph_embeddings()
+                pass
+            loss_total /= num_nodes
 
-                graph.reset_batch()
+            graphs.reset_batch()
+            if(self.epsilon > 0.05): # decay epsilon
+                    self.epsilon *= self.epsilon_decay
+            
+            if(epoch % 50 == 0): # set target as local
+                print("Epoch:", epoch, "--- Loss:", loss_total)    
+                self.local_qnet.save_model('./backup/local_qnet.params')
+                self.target_qnet.save_model('./backup/target_qnet.params')
+                self.target_qnet.load_state_dict(self.local_qnet.state_dict())
 
-    def decide_node_coloring(self, graphs, num_nodes, batch):
+            
+    def decide_node_coloring(self, graphs, num_nodes, batch, colored_arrs):
+        actions = []
+        q_pred = []
         for el in range(batch):
+            max_action = -999
+            max_node = -1
+            node_embeds = graphs.get_node_embed(el)
+            graph_embeds = graphs.get_graph_embed(el)
+            if random.random() > self.epsilon:
+                for node in range(num_nodes):
+                    if colored_arrs[el][node]:
+                        continue
+                    embeddings = np.concatenate([node_embeds[node], graph_embeds])
+                    embeddings = torch.from_numpy(embeddings).float()
+                    with torch.no_grad():
+                        action = self.local_qnet(embeddings)
+                    if(max_action < action):
+                        max_node = node
+                        max_action = action
+                colored_arrs[el][max_node] = True
+                actions.append(max_node)
+                q_pred.append(max_action)
 
-        pass
+            else:
+                found = False
+                while not found:
+                    node = random.randint(0, num_nodes - 1)
+                    if not colored_arrs[el][node]:
+                        found = True
+                        colored_arrs[el][node] = True
+                        embeddings = np.concatenate([node_embeds[node], graph_embeds])
+                        embeddings = torch.from_numpy(embeddings).float()
+                        with torch.no_grad():
+                            action_val = self.local_qnet(embeddings)
+                        q_pred.append(action_val)
+                        actions.append(node)
+
+        return actions, torch.Tensor(q_pred).requires_grad_()
+    
+    def get_rewards(self, batch, colors, max_colors):
+        rewards = [0]*batch
+        for el in range(batch):
+            # print(max_colors[el], colors[el])
+            rewards[el] = - max(0, - max_colors[el] + colors[el])
+        return np.array(rewards)
+
+    def get_loss(self, graphs, batch, rewards, actions):
+        losses = [0]*batch
+        for el in range(batch):
+            node_embeds = graphs.get_node_embed(el)
+            graph_embeds = graphs.get_graph_embed(el)
+            embeddings = np.concatenate([node_embeds[actions[el]], graph_embeds])
+            embeddings = torch.from_numpy(embeddings).float()
+            with torch.no_grad():
+        
+                losses[el] = rewards[el] + self.gamma * self.target_qnet(embeddings)
+        return torch.Tensor(losses).requires_grad_()
