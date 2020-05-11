@@ -15,17 +15,63 @@ std::vector<std::vector<int>> color_arrs;
 int nfeatures_size = 9;
 int gfeatures_size = 15;
 
-extern "C" void insert_batch(int batch, int n, int e)
+extern "C" int* insert_batch(int batch, int min_nodes, int max_nodes)
 {
+	srand(112);
+	int *node_cnts = new int[batch];
+	node_embeds = std::vector<std::vector<std::vector<float>>>(batch, std::vector<std::vector<float>>(nfeatures_size));
+	graph_embeds = std::vector<std::vector<float>>(batch);
+	color_arrs = std::vector<std::vector<int>>(batch);
 	for (int i = 0; i < batch; i++)
 	{
+		// int n = 90;
+		// int e = 1800;
+		int n = rand() % (max_nodes - min_nodes) + min_nodes;
+		int max_edges = n*n/2, min_edges = 1;
+		if(n > 20) min_edges = 10 * n;
+		int e = rand() % (max_edges - min_edges) + min_edges;
 		Graph g(n, e);
 		graphs.push_back(g);
+		node_cnts[i] = n;
+		for(int k = 0; k < nfeatures_size; k++) {
+			node_embeds[i][k] = std::vector<float>(n, 0);
+		}
+		color_arrs[i] = std::vector<int> (n, -1);
 	}
-	node_embeds = std::vector<std::vector<std::vector<float>>>(batch,
-															   std::vector<std::vector<float>>(nfeatures_size, std::vector<float>(n, 0)));
+	return node_cnts;
+}
+
+extern "C" int* read_batch(char *location, int *size)
+{
+	std::vector<std::string> files;
+	if (auto dir = opendir(location))
+    {
+        while (auto f = readdir(dir))
+        {
+            if (!f->d_name || f->d_name[0] == '.')
+                continue;
+			std::string path = string(location) + f->d_name;
+            std::cout << path << std::endl;
+        }
+    }
+
+	int batch = files.size();
+	*size = batch;
+	int *node_cnts = new int[batch];
+	node_embeds = std::vector<std::vector<std::vector<float>>>(batch, std::vector<std::vector<float>>(nfeatures_size));
 	graph_embeds = std::vector<std::vector<float>>(batch);
-	color_arrs = std::vector<std::vector<int>>(batch, std::vector<int>(n, -1));
+	color_arrs = std::vector<std::vector<int>>(batch);
+
+	for(int i = 0; i < batch; i++) {
+		Graph g(files[i]);
+		graphs.push_back(g);
+		node_cnts[i] = g.num_nodes;
+		for(int k = 0; k < nfeatures_size; k++) {
+			node_embeds[i][k] = std::vector<float>(g.num_nodes, 0);
+		}
+		color_arrs[i] = std::vector<int> (g.num_nodes, -1);
+	}
+	return node_cnts;
 }
 
 extern "C" void reset_batch()
@@ -337,6 +383,10 @@ extern "C" int *color_batch(int *nodes, int *size)
 	*size = graphs.size();
 	for (unsigned int i = 0; i < graphs.size(); i++)
 	{
+		if(*(nodes + i) == -1) {
+			colors[i] = -1;
+			continue;
+		}
 		color_graph(i, *(nodes + i), colors[i]);
 		update_node_embed(i, *(nodes + i), colors[i]);
 	}

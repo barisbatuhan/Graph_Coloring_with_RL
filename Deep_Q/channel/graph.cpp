@@ -1,5 +1,4 @@
 #include "graph.h"
-#include <time.h>
 // CONSTRUCTORS
 Graph::Graph()
 {
@@ -100,7 +99,6 @@ Graph::Graph(std::string fname)
 
 Graph::Graph(int node_cnt, int edge_cnt)
 {
-    srand(time(NULL));
     std::vector<std::vector<bool>> adj_list(node_cnt, std::vector<bool>(node_cnt, false));
     num_nodes = node_cnt;
     num_edges = edge_cnt;

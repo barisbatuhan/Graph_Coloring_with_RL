@@ -11,9 +11,11 @@ class Graph_Lib(object):
         # self.lib.initialize_graph_embeddings_for_batch.argtypes = []
         # self.lib.initialize_graph_embeddings_for_batch.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_float))
         # graph reader
-        self.lib.insert_batch.argtypes = [
-            ctypes.c_int, ctypes.c_int, ctypes.c_int]
+        self.lib.insert_batch.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
+        self.lib.insert_batch.restype = ctypes.POINTER(ctypes.c_int)
         self.lib.reset_batch.argtypes = []
+        self.lib.read_batch.argtypes = [ctypes.c_char_p]
+        self.lib.read_batch.restype = ctypes.POINTER(ctypes.c_int)
         # embedding init
         self.lib.init_node_embeddings.argtypes = []
         self.lib.init_graph_embeddings.argtypes = []
@@ -34,11 +36,18 @@ class Graph_Lib(object):
         
         # self.lib.update_node_embeddings.argtypes = [ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
 
-    def insert_batch(self, batch, n, e):
-        self.lib.insert_batch(batch, n, e)
+    def insert_batch(self, batch, min_n, max_n):
+        nodes = self.lib.insert_batch(batch, min_n, max_n)
+        return nodes[:batch]
 
     def reset_batch(self):
         self.lib.reset_batch()
+
+    def read_batch(self, path):
+        a = ctypes.c_int(0)
+        location = ctypes.c_char_p(path.encode('utf-8'))
+        nodes = self.lib.read_batch(location, ctypes.byref(a))
+        return nodes[:a.value]
 
     def init_node_embeddings(self):
         self.lib.init_node_embeddings()
