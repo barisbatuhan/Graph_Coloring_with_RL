@@ -57,7 +57,7 @@ By using results of all these heuristics, a Double Deep-Q Network is constructed
 
 As a result of the first part of the project, which includes heuristic analysis and weighted model construction, one can see that the weighted ordering model dominates all the other heuristics, that were used for static greedy coloring, as well as colorings based on uniform and random node selection. If the heuristics’ results are investigated for small size graphs in distance-1 coloring, since the ratio is taken with respect to the optimal coloring results, the improvement is ~4% compared to the best heuristic. For large graphs, improvement is only ~3% and for distance-2 colorings for both sizes, only ~1%. 
 
-![Weighted Result with other Static Coloring Algorithms](./Images/weighed_results.png)
+![Weighted Result with other Static Coloring Algorithms](./Images/weighted_results.png)
 
 If dynamic coloring algorithms are also involved, then better results can be obtained compared to weighted ordering algorithms. Especially with saturation coloring, ~8-10% improvement on distance-1 coloring and ~4% improvement in distance-2 coloring is observed. 
 
