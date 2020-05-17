@@ -1,189 +1,17 @@
 #include "graph.h"
-
-using namespace std;
-
-// pseudo normalization
-void normalize(vector<float> & g_s) {
-	double sq_sum = 0;
-	for (auto x : g_s)
-		sq_sum += x*x;
-	double norm = sqrt(sq_sum); // norm of the vec
-	for (auto & x : g_s)
-		x /= norm;
+// CONSTRUCTORS
+Graph::Graph()
+{
 }
-
-
-void transpose(vector<vector<float>> & node_embeddings){
-    int rows = node_embeddings.size();
-    int cols = node_embeddings[0].size();
-    vector<vector<float>> res(cols, vector<float>(rows));
-
-    for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++) {
-			res[j][i] = node_embeddings[i][j];
-		}
-	}
-    node_embeddings = res;
-}
-
-// smallest distance to colored/uncolored node is missing
-void initialize_node_embeddings(Graph & g, vector<vector<float>> & node_embeddings){
-    auto & row_ptr = g.row_ptr;
-    auto & col_ind = g.col_ind; 
-    int size = g.num_nodes;
-	
-    node_embeddings = vector<vector<float>>(9, vector<float>(size, 0));
-
-    g.degree_order(node_embeddings[0]);
-    g.degree_2_order(node_embeddings[1]);
-    g.degree_3_order(node_embeddings[2]);
-    g.closeness_centrality_approx(node_embeddings[3]);
-    g.clustering_coeff(node_embeddings[4]);
-    g.page_rank(node_embeddings[5]);
-    // dynamic coeffs
-    // 6th index -> nof colored neighbors
-    // 7th index -> nof different colored neighbors
-    // 8th index -> is node itself colored
-    // dynamic coefficients are automatically 0 in the beginning
-
-    transpose(node_embeddings);
-}
-
-
-// immediate update (not expensive)
-void update_node_embeddings(Graph & g, vector<vector<float>> & node_embeddings, int latest_colored_node, int latest_color){
-    auto & row_ptr = g.row_ptr;
-    auto & col_ind = g.col_ind; 
-    int size = g.num_nodes;
-	for(int edge = row_ptr[latest_colored_node]; edge < row_ptr[latest_colored_node+1]; edge++){
-        int adj = col_ind[edge];
-        node_embeddings[adj][6]++;
-        if(latest_color > node_embeddings[adj][7]){
-            node_embeddings[adj][7] = latest_color;
-        }
-    }
-    node_embeddings[latest_colored_node][8] = 1;
-}
-
-void initialize_graph_state(Graph & g, vector<float> & g_s) {
-	auto & row_ptr = g.row_ptr;
-    auto & col_ind = g.col_ind; 
-    int size = g.num_nodes;
-    vector<float> closeness;
-    g.closeness_centrality_approx(closeness);
-	g_s.resize(16);
-
-	g_s[0] = size;                                              // num nodes
-	g_s[1] = g.num_edges;                                       // num edges
-	g_s[2] = 0;                                                 // nof adjacents of colored nodes
-	g_s[3] = 0;                                                 // nof colored adjacents of colored nodes
-	g_s[4] = 0;                                                 // closeness sum of colored nodes
-	g_s[5] = 0;                                                 // nof colored nodes
-    for(int i=0; i<closeness.size(); i++){                      // closeness sum of uncolored nodes
-        g_s[6] += closeness[i];
-    }
-	g_s[7] = size;                                              // nof uncolored nodes
-	g_s[8] = 0;                                                 // degree above mean (among colored nodes)
-	g_s[9] = 0;                                                 // degree below mean (among colored nodes)
-	g_s[10] = 0;                                                // degree above mean (among uncolored nodes)
-	g_s[11] = 0;                                                // degree below mean (among uncolored nodes)
-	double degree_mean = (double)row_ptr.back() / size;
-	double degree_sq_sum = 0;
-	for (int v = 0; v < row_ptr.size() - 1; v++) {
-		int degree = row_ptr[v + 1] - row_ptr[v];
-		if (degree > degree_mean) {
-			g_s[10]++;
-		}
-		else {
-			g_s[11]++;
-		}
-		degree_sq_sum += degree * degree;
-	}
-	double variance = degree_sq_sum / size - (degree_mean*degree_mean);
-	g_s[12] = 0;                                                // mean degree of colored nodes
-	g_s[13] = degree_mean;                                      // mean degree of uncolored nodes
-	g_s[14] = 0;                                                // variance of degrees (colored nodes)
-	g_s[15] = variance;                                         // variance of degrees (uncolored nodes)
-	//normalize(g_s);
-}
-
-
-// diameter is missing (we need two bfs to calculate it)
-void update_graph_state(Graph & g, vector<float> & graph_state, unordered_set<int> & sol_set) {
-	auto & row_ptr = g.row_ptr;
-	auto & col_ind = g.col_ind;
-    int size = g.num_nodes;
-    vector<float> closeness;
-    g.closeness_centrality_approx(closeness);
-
-	double degree_mean = (double)row_ptr.back() / size;
-	double colored_degree_sum = 0;
-	double colored_degree_sq_sum = 0;
-	double uncolored_degree_sum = 0;
-	double uncolored_degree_sq_sum = 0;
-	graph_state[0] = size;                                              // num nodes
-	graph_state[1] = g.num_edges;                                       // num edges
-	graph_state[2] = 0;                                                 // nof adjacents of colored nodes
-	graph_state[3] = 0;                                                 // nof colored adjacents of colored nodes
-	graph_state[4] = 0;                                                 // closeness sum of colored nodes
-	graph_state[6] = accumulate(closeness.begin(), closeness.end(), 0); // closeness sum of uncolored nodes
-	graph_state[8] = 0;                                                 // degree above mean (among colored nodes)
-	graph_state[9] = 0;                                                 // degree below mean (among colored nodes)
-	graph_state[10] = 0;                                                // degree above mean (among uncolored nodes)
-	graph_state[11] = 0;                                                // degree below mean (among uncolored nodes)
-	for (int v = 0; v < size; v++) {
-		int degree = row_ptr[v + 1] - row_ptr[v];
-		if (sol_set.find(v) != sol_set.end()) {
-			colored_degree_sum += degree;
-			colored_degree_sq_sum += degree*degree;
-			graph_state[2] += degree;
-			if (degree > degree_mean) {
-				graph_state[8] ++;
-				graph_state[10] --;
-			}
-			else {
-				graph_state[9] ++;
-				graph_state[11] --;
-			}
-
-			for (int edge = row_ptr[v]; edge < row_ptr[v + 1]; edge++) {
-				int adj = col_ind[edge];
-				if (sol_set.find(adj) != sol_set.end()) {
-					graph_state[3]++;
-				}
-			}
-			graph_state[4] += closeness[v];
-			graph_state[6] -= closeness[v];
-		}
-		else {
-			uncolored_degree_sum += degree;
-			uncolored_degree_sq_sum += degree*degree;
-		}
-	}
-	graph_state[5] = sol_set.size();
-	graph_state[7] = size - sol_set.size();
-	graph_state[12] = colored_degree_sum / (sol_set.size() + 1);
-	graph_state[13] = uncolored_degree_sum / (size - sol_set.size());
-	graph_state[14] = colored_degree_sq_sum / sol_set.size() - (graph_state[12] * graph_state[12]);
-	graph_state[15] = uncolored_degree_sq_sum / (size - sol_set.size()) - (graph_state[13] * graph_state[13]);
-	normalize(graph_state);
-}
-
-vector<float> concatenate(vector<float> & first, vector<float> & second) {
-	vector<float> res = first;
-	for (int i = 0; i < second.size(); i++) {
-		res.push_back(second[i]);
-	}
-	return res;
-}
-
-
-
-
-/* CONSTRUCTORS */
-
+/**
+ * Graph constructor:
+ * Gets a filename and reads the graph from the file
+ * Each graph is considered as undirected and unweighted
+ * Designed for Suite-Sparse Matrix Collection Matrix Market files
+ * */
 Graph::Graph(std::string fname)
 {
+    max_degree = 0;
     std::ifstream input(fname.c_str());
     if (input.fail())
     {
@@ -209,11 +37,6 @@ Graph::Graph(std::string fname)
     std::istringstream ss(line);
     ss >> num_nodes >> num_nodes >> num_edges;
     int v1, v2;
-    double weight;
-
-    std::vector<int> renameArr(num_nodes, -1);
-    int counter = 0;
-    bool eliminateUnused = true;
 
     std::vector<std::vector<int>> adj_list(num_nodes);
     for (int i = 0; i < num_edges; i++)
@@ -224,37 +47,11 @@ Graph::Graph(std::string fname)
         v1--; // make it 0 based
         v2--;
 
-        //for detecting vetices that are unused
-        if (renameArr[v1] == -1 && eliminateUnused)
-        {
-            renameArr[v1] = counter;
-            v1 = counter;
-            counter++;
-        }
-        else if (eliminateUnused)
-        {
-            v1 = renameArr[v1];
-        }
-        if (renameArr[v2] == -1 && eliminateUnused)
-        {
-            renameArr[v2] = counter;
-            v2 = counter;
-            counter++;
-        }
-        else if (eliminateUnused)
-        {
-            v2 = renameArr[v2];
-        }
-
         if (v1 != v2)
         {
             adj_list[v1].push_back(v2); // add the edge v1->v2
             adj_list[v2].push_back(v1); // add the edge v2->v1
         }
-    }
-    if (eliminateUnused)
-    {
-        num_nodes = counter;
     }
 
     row_ptr = std::vector<int>(num_nodes + 1);
@@ -264,6 +61,9 @@ Graph::Graph(std::string fname)
     for (int v = 0; v < num_nodes; v++)
     {
         row_ptr[v + 1] = adj_list[v].size(); // assign number of edges going from node v
+        if(row_ptr[v + 1] > max_degree) {
+            max_degree = row_ptr[v + 1];
+        }
         for (int i = 0; i < (int)adj_list[v].size(); i++)
         {
             col_ind[index] = adj_list[v][i]; // put all edges in order wrt row_ptr
@@ -276,9 +76,14 @@ Graph::Graph(std::string fname)
     }
 }
 
+/**
+ * Graph constructor:
+ * Gets node count and edge count and generates a random undirected unweighted graph
+ * with these node and edge numbers.
+ * */
 Graph::Graph(int node_cnt, int edge_cnt)
-{   
-    srand(112);
+{
+    max_degree = 0;
     std::vector<std::vector<bool>> adj_list(node_cnt, std::vector<bool>(node_cnt, false));
     num_nodes = node_cnt;
     num_edges = edge_cnt;
@@ -312,31 +117,38 @@ Graph::Graph(int node_cnt, int edge_cnt)
                 adj_cnt++;
             }
         }
+        if(adj_cnt > max_degree) {
+            max_degree = adj_cnt;
+        }
         row_ptr[v + 1] = row_ptr[v] + adj_cnt; // assign number of edges going from node v
     }
 }
 
-/* COLORING METHODS */
+// COLORING METHODS
 
+/**
+ * Applies distance 1 coloring on the graph greedily the with first fitting color. 
+ * An ordering is passed to determine which nodes to color first.
+ * */
 int Graph::color_1d(const std::vector<std::pair<int, float>> &ordering)
 {
     std::vector<int> color_arr(ordering.size(), -1);
     int nofcolors = 0;
     std::vector<int> forbid_arr(row_ptr.size() - 1, -1);
     bool hasEdge = false;
-    for (int i = 0; i < ordering.size(); i++)
+    for (int i = 0; i < (int)ordering.size(); i++)
     {
-        const int &node = ordering[i].first; //for each node in ordering
+        const int &node = ordering[i].first; // for each node in ordering
         for (int edge = row_ptr[node]; edge < row_ptr[node + 1]; edge++)
         {
             hasEdge = true;
-            const int &adj = col_ind[edge]; //for each adjacent node
+            const int &adj = col_ind[edge]; // for each adjacent node
             if (color_arr[adj] != -1)
             {                                      // if it is already colored
                 forbid_arr[color_arr[adj]] = node; // that color is forbidden to node
             }
         }
-        for (int color = 0; color < ordering.size(); color++)
+        for (int color = 0; color < (int)ordering.size(); color++)
         { // greedily choose the smallest possible color
             if (forbid_arr[color] != node)
             {
@@ -353,20 +165,23 @@ int Graph::color_1d(const std::vector<std::pair<int, float>> &ordering)
     {
         nofcolors++;
     }
-    // if (!is_valid_1d(color_arr) == true)
-    // {
-    // 	cout << "ERROR" << endl;
-    // }
+    // check is the coloring is valid
+    // if (!is_valid_1d(color_arr) == true) cout << "ERROR" << endl;
     return nofcolors;
 }
 
+
+/**
+ * Applies distance 2 coloring on the graph greedily the with first fitting color. 
+ * An ordering is passed to determine which nodes to color first.
+ * */
 int Graph::color_2d(const std::vector<std::pair<int, float>> &ordering)
 {
     std::vector<int> color_arr(ordering.size(), -1);
     int nofcolors = 0;
     std::vector<int> forbid_arr(row_ptr.size() - 1, -1);
     bool hasEdge = false;
-    for (int i = 0; i < ordering.size(); i++)
+    for (int i = 0; i < (int)ordering.size(); i++)
     {
         const int &node = ordering[i].first; //for each node in ordering
         for (int edge = row_ptr[node]; edge < row_ptr[node + 1]; edge++)
@@ -386,7 +201,7 @@ int Graph::color_2d(const std::vector<std::pair<int, float>> &ordering)
                 }
             }
         }
-        for (int color = 0; color < ordering.size(); color++)
+        for (int color = 0; color < (int)ordering.size(); color++)
         { // greedily choose the smallest possible color
             if (forbid_arr[color] != node)
             {
@@ -403,14 +218,19 @@ int Graph::color_2d(const std::vector<std::pair<int, float>> &ordering)
     {
         nofcolors++;
     }
-    // if (!is_valid_2d(color_arr) == true) {
-    // 	cout << "ERROR" << endl;
-    // }
+    // checkis if the coloring is valid
+    // if (!is_valid_2d(color_arr) == true) cout << "ERROR" << endl;
     return nofcolors;
 }
 
+
+/**
+ * Applies distance 1 coloring on the graph greedily the with first fitting color. 
+ * At each step, chooses the node for coloring, which has most number of colored neighbors. 
+ * If start is not randomized, then starts with the node having maximum neighbors.
+ * */
 int Graph::color_dynamic_1d(bool random_start){
-    int start;
+    int start=-1;
     if(random_start){
         start = rand()%num_nodes;
     }
@@ -427,7 +247,7 @@ int Graph::color_dynamic_1d(bool random_start){
 
     Heap orderHeap;
     vector<pair<int, float>> zero(num_nodes, pair<int,float>(0,0));
-    for(int i=0; i<zero.size(); i++){
+    for(int i=0; i<(int)zero.size(); i++){
         zero[i].first = i;
     }
     zero[start].second = 1;
@@ -437,13 +257,14 @@ int Graph::color_dynamic_1d(bool random_start){
     vector<int> color_arr(num_nodes, -1);
 
     while(colored < num_nodes){
-        auto [node, val] = orderHeap.deleteMax(); // structured binding
+        auto deleted = orderHeap.deleteMax(); // structured binding
+        auto node = deleted.first;
         for (int edge = row_ptr[node]; edge < row_ptr[node + 1]; edge++) {
             const int & adj = col_ind[edge]; //for each adjacent node
             int index = orderHeap.locArr[adj];
             if(index != -1){ // if it is not colored
                 orderHeap.arr[index].second++;
-                orderHeap.percolateUp(index);  
+                orderHeap.percolateUp(index);
             }
             if (color_arr[adj] != -1) { // if it is already colored
                 forbid_arr[color_arr[adj]] = node; // that color is forbidden to node
@@ -460,16 +281,19 @@ int Graph::color_dynamic_1d(bool random_start){
         }
         colored++;
     }
-			
     nofcolors++; // coloring was zero based so increment
-    if (!is_valid_1d(color_arr)){
-        cout << "ERROR" << endl;
-    }
+    
+    // if (!is_valid_1d(color_arr)) cout << "ERROR" << endl;
     return nofcolors;
 }
 
+/**
+ * Applies distance 2 coloring on the graph greedily the with first fitting color. 
+ * At each step, chooses the node for coloring, which has most number of colored neighbors. 
+ * If start is not randomized, then starts with the node having maximum neighbors.
+ * */
 int Graph::color_dynamic_2d(bool random_start){
-    int start;
+    int start=-1;
     if(random_start){
         start = rand()%num_nodes;
     }
@@ -486,7 +310,7 @@ int Graph::color_dynamic_2d(bool random_start){
 
     Heap orderHeap;
     vector<pair<int, float>> zero(num_nodes, pair<int,float>(0,0));
-    for(int i=0; i<zero.size(); i++){
+    for(int i=0; i<(int)zero.size(); i++){
         zero[i].first = i;
     }
     zero[start].second = 1;
@@ -496,13 +320,14 @@ int Graph::color_dynamic_2d(bool random_start){
     vector<int> color_arr(num_nodes, -1);
 
     while(colored < num_nodes){
-        auto [node, val] = orderHeap.deleteMax(); // structured binding
+        auto deleted = orderHeap.deleteMax(); // structured binding
+        auto node = deleted.first;
         for (int edge = row_ptr[node]; edge < row_ptr[node + 1]; edge++) {
             const int & adj = col_ind[edge]; //for each adjacent node
             int index = orderHeap.locArr[adj];
             if(index != -1){ // if it is not colored
                 orderHeap.arr[index].second++;
-                orderHeap.percolateUp(index);  
+                orderHeap.percolateUp(index);
             }
             if (color_arr[adj] != -1) { // if it is already colored
                 forbid_arr[color_arr[adj]] = node; // that color is forbidden to node
@@ -512,7 +337,7 @@ int Graph::color_dynamic_2d(bool random_start){
                 index = orderHeap.locArr[adj_neigh];
                 if(index != -1){ // if it is not colored
                     orderHeap.arr[index].second ++;
-                    orderHeap.percolateUp(index);  
+                    orderHeap.percolateUp(index);
                 }
                 if (color_arr[adj_neigh] != -1) { // if it is already colored
                     forbid_arr[color_arr[adj_neigh]] = node; // that color is forbidden to node
@@ -530,7 +355,7 @@ int Graph::color_dynamic_2d(bool random_start){
         }
         colored++;
     }
-			
+
     nofcolors++; // coloring was zero based so increment
     if (!is_valid_2d(color_arr)){
         cout << "ERROR" << endl;
@@ -538,12 +363,17 @@ int Graph::color_dynamic_2d(bool random_start){
     return nofcolors;
 }
 
-//int Graph::color_dynamic_2d(bool random_start=false);
 
+/**
+ * Applies distance 1 coloring on the graph greedily the with first fitting color. 
+ * At each step, chooses the node for coloring, which has most number of different colored neighbors (saturation). 
+ * Takes a spare order to break the tie, where nodes to select have the same amount of different 
+ * colored neighbors.
+ * */
 int Graph::color_saturation_1d(std::vector<std::pair<int, float>> &spare_order)
 {
-    std::vector<std::unordered_set<int>> color_infos(num_nodes);
-    std::vector<std::pair<int, int>> node_values(2, {1, 0});
+    std::vector<std::unordered_set<int>> color_infos(num_nodes); // for each node, set of colors of node's neighbors hold
+    std::vector<std::pair<int, int>> node_values(2, {1, 0}); // holds 2 nodes with max different colored neighbors
     std::vector<bool> node_colored(num_nodes, false);
 
     std::vector<int> color_arr(num_nodes, -1);
@@ -555,16 +385,12 @@ int Graph::color_saturation_1d(std::vector<std::pair<int, float>> &spare_order)
     {
         int i = 0;
         std::pair<int, int> &node = node_values[i];
-        while (node_colored[node.first] == true)
-        {
-            node = node_values[++i];
-        }
         std::pair<int, int> &next_node = node_values[i + 1];
-        if (next_node.first != -1 && next_node.second == node.second)
+        if (next_node.first != -1 && next_node.second == node.second) // checks if the second node has the same value with first
         {
             if (node_colored[next_node.first] != true)
             {
-                if (spare_order[next_node.first] > spare_order[node.first])
+                if (spare_order[next_node.first] > spare_order[node.first]) // if so, takes the one with higher spare order value
                 {
                     node = next_node;
                 }
@@ -588,7 +414,7 @@ int Graph::color_saturation_1d(std::vector<std::pair<int, float>> &spare_order)
         node_colored[node.first] = true;
         colored_num++;
 
-        // set of color of neighbors are arranged
+        // new color is added to the set of adjacent neighbors
         for (int edge = row_ptr[node.first]; edge < row_ptr[node.first + 1]; edge++)
         {
             hasEdge = true;
@@ -601,7 +427,7 @@ int Graph::color_saturation_1d(std::vector<std::pair<int, float>> &spare_order)
         node_values[1].first = -1;
         node_values[1].second = -9999;
 
-        for (int i = 0; i < num_nodes; i++)
+        for (int i = 0; i < num_nodes; i++) // nodes with the highest saturation are selected
         {
             if (node_colored[i])
             {
@@ -627,17 +453,22 @@ int Graph::color_saturation_1d(std::vector<std::pair<int, float>> &spare_order)
     {
         nofcolors++;
     }
-    // if (!is_valid_1d(color_arr) == true)
-    // {
-    // 	cout << "ERROR" << endl;
-    // }
+    // validity of coloring is checked
+    // if (!is_valid_1d(color_arr) == true) cout << "ERROR" << endl;
     return nofcolors;
 }
 
+
+/**
+ * Applies distance 2 coloring on the graph greedily the with first fitting color. 
+ * At each step, chooses the node for coloring, which has most number of different colored neighbors (saturation). 
+ * Takes a spare order to break the tie, where nodes to select have the same amount of different 
+ * colored neighbors.
+ * */
 int Graph::color_saturation_2d(std::vector<std::pair<int, float>> &spare_order)
 {
-    std::vector<std::unordered_set<int>> color_infos(num_nodes);
-    std::vector<std::pair<int, int>> node_values(2, {1, 0});
+    std::vector<std::unordered_set<int>> color_infos(num_nodes); // for each node, set of colors of node's neighbors hold
+    std::vector<std::pair<int, int>> node_values(2, {1, 0}); // holds 2 nodes with max different colored neighbors
     std::vector<bool> node_colored(num_nodes, false);
 
     std::vector<int> color_arr(num_nodes, -1);
@@ -654,11 +485,11 @@ int Graph::color_saturation_2d(std::vector<std::pair<int, float>> &spare_order)
             node = node_values[++i];
         }
         std::pair<int, int> &next_node = node_values[i + 1];
-        if (next_node.first != -1 && next_node.second == node.second)
+        if (next_node.first != -1 && next_node.second == node.second) // checks if the second node has the same value with first
         {
             if (node_colored[next_node.first] != true)
             {
-                if (spare_order[next_node.first] > spare_order[node.first])
+                if (spare_order[next_node.first] > spare_order[node.first]) // if so, takes the one with higher spare order value
                 {
                     node = next_node;
                 }
@@ -701,7 +532,7 @@ int Graph::color_saturation_2d(std::vector<std::pair<int, float>> &spare_order)
         node_values[1].first = -1;
         node_values[1].second = -9999;
 
-        for (int i = 0; i < num_nodes; i++)
+        for (int i = 0; i < num_nodes; i++) // nodes with the highest saturation are selected
         {
             if (node_colored[i])
             {
@@ -727,15 +558,12 @@ int Graph::color_saturation_2d(std::vector<std::pair<int, float>> &spare_order)
     {
         nofcolors++;
     }
-    // if (!is_valid_2d(color_arr) == true)
-    // {
-    // 	cout << "ERROR" << endl;
-    // }
+    // validity of coloring is checked
+    // if (!is_valid_2d(color_arr) == true) cout << "ERROR" << endl;
     return nofcolors;
 }
 
-/* COLORING VALIDITY CHECKERS */
-
+// COLORING VALIDITY CHECKERS
 bool Graph::is_valid_1d(const std::vector<int> &color_arr)
 {
     for (int v = 0; v < num_nodes; v++)
@@ -787,8 +615,11 @@ bool Graph::is_valid_2d(const std::vector<int> &color_arr)
     return true;
 }
 
-/* ORDERING METHODS */
-
+// ORDERING METHODS
+/**
+ * Writes the number of neighbors for each node to ordering vector
+ * First element of the "ordering" pair is the node number, second is the degree value
+ * */
 void Graph::degree_order(std::vector<std::pair<int, float>> &ordering)
 {
     ordering = std::vector<std::pair<int, float>>(num_nodes);
@@ -799,6 +630,9 @@ void Graph::degree_order(std::vector<std::pair<int, float>> &ordering)
     }
 }
 
+/**
+ * Writes the number of neighbors for each node to ordering vector
+ * */
 void Graph::degree_order(std::vector<float> &ordering)
 {
     ordering = std::vector<float>(num_nodes);
@@ -809,9 +643,10 @@ void Graph::degree_order(std::vector<float> &ordering)
     }
 }
 
-
-
-
+/**
+ * Writes the number of nodes with distance <= 2 for each node to ordering vector
+ * First element of the "ordering" pair is the node number, second is the degree-2 value
+ * */
 void Graph::degree_2_order(std::vector<std::pair<int, float>> &ordering)
 {
     ordering = std::vector<std::pair<int, float>>(num_nodes);
@@ -819,9 +654,9 @@ void Graph::degree_2_order(std::vector<std::pair<int, float>> &ordering)
     for (int v = 0; v < num_nodes; v++)
     {
         std::vector<int> dist_arr(num_nodes);
-        bfs(v, dist_arr, 2); // take distance array for node v
+        bfs(v, dist_arr, 2); // take distance array for node v until distance 2
         int count = 0, val;
-        for (int i = 0; i < dist_arr.size(); i++)
+        for (int i = 0; i < (int)dist_arr.size(); i++)
         {
             val = dist_arr[i];
             if (val == 1 || val == 2)
@@ -834,6 +669,9 @@ void Graph::degree_2_order(std::vector<std::pair<int, float>> &ordering)
 }
 
 
+/**
+ * Writes the number of nodes with distance <= 2 for each node to ordering vector
+ * */
 void Graph::degree_2_order(std::vector<float> &ordering)
 {
     ordering = std::vector<float>(num_nodes);
@@ -841,9 +679,9 @@ void Graph::degree_2_order(std::vector<float> &ordering)
     for (int v = 0; v < num_nodes; v++)
     {
         std::vector<int> dist_arr(num_nodes);
-        bfs(v, dist_arr, 2); // take distance array for node v
+        bfs(v, dist_arr, 2); // take distance array for node v until distance 2
         int count = 0, val;
-        for (int i = 0; i < dist_arr.size(); i++)
+        for (int i = 0; i < (int)dist_arr.size(); i++)
         {
             val = dist_arr[i];
             if (val == 1 || val == 2)
@@ -856,6 +694,10 @@ void Graph::degree_2_order(std::vector<float> &ordering)
 }
 
 
+/**
+ * Writes the number of nodes with distance <= 3 for each node to ordering vector
+ * First element of the "ordering" pair is the node number, second is the degree-3 value
+ * */
 void Graph::degree_3_order(std::vector<std::pair<int, float>> &ordering)
 {
     ordering = std::vector<std::pair<int, float>>(num_nodes);
@@ -863,9 +705,9 @@ void Graph::degree_3_order(std::vector<std::pair<int, float>> &ordering)
     for (int v = 0; v < num_nodes; v++)
     {
         std::vector<int> dist_arr(num_nodes);
-        bfs(v, dist_arr, 3); // take distance array for node v
+        bfs(v, dist_arr, 3); // take distance array for node v until distance 3
         int count = 0, val;
-        for (int i = 0; i < dist_arr.size(); i++)
+        for (int i = 0; i < (int)dist_arr.size(); i++)
         {
             val = dist_arr[i];
             if (val == 1 || val == 2 || val == 3)
@@ -878,6 +720,9 @@ void Graph::degree_3_order(std::vector<std::pair<int, float>> &ordering)
 }
 
 
+/**
+ * Writes the number of nodes with distance <= 3 for each node to ordering vector
+ * */
 void Graph::degree_3_order(std::vector<float> &ordering)
 {
     ordering = std::vector<float>(num_nodes);
@@ -885,9 +730,9 @@ void Graph::degree_3_order(std::vector<float> &ordering)
     for (int v = 0; v < num_nodes; v++)
     {
         std::vector<int> dist_arr(num_nodes);
-        bfs(v, dist_arr, 3); // take distance array for node v
+        bfs(v, dist_arr, 3); // take distance array for node v until distance 3
         int count = 0, val;
-        for (int i = 0; i < dist_arr.size(); i++)
+        for (int i = 0; i < (int)dist_arr.size(); i++)
         {
             val = dist_arr[i];
             if (val == 1 || val == 2 || val == 3)
@@ -899,6 +744,12 @@ void Graph::degree_3_order(std::vector<float> &ordering)
     }
 }
 
+
+/**
+ * Calculates closeness centrality for the graph
+ * Closeness formula is: number of nodes / sum of all distances from selected node
+ * First element of the "ordering" pair is the node number, second is the closeness value
+ * */
 void Graph::closeness_centrality(std::vector<std::pair<int, float>> &ordering)
 {
     ordering = std::vector<std::pair<int, float>>(num_nodes);
@@ -912,6 +763,11 @@ void Graph::closeness_centrality(std::vector<std::pair<int, float>> &ordering)
     }
 }
 
+
+/**
+ * Calculates closeness centrality for the graph
+ * Closeness formula is: number of nodes / sum of all distances from selected node
+ * */
 void Graph::closeness_centrality(std::vector<float> &ordering)
 {
     ordering = std::vector<float>(num_nodes);
@@ -926,7 +782,13 @@ void Graph::closeness_centrality(std::vector<float> &ordering)
 }
 
 
-
+/**
+ * Calculates an approximation for closeness centrality especially for big sized graphs
+ * A size is taken as an input and size many BFS algorithms are run. Values are approximated
+ * using these BFS results.
+ * Closeness formula is: number of nodes / sum of all distances from selected node
+ * First element of the "ordering" pair is the node number, second is the closeness value
+ * */
 void Graph::closeness_centrality_approx(std::vector<std::pair<int, float>> &ordering, int size)
 {
     ordering = std::vector<std::pair<int, float>>(num_nodes);
@@ -934,7 +796,7 @@ void Graph::closeness_centrality_approx(std::vector<std::pair<int, float>> &orde
     {
         size = num_nodes;
     }
-    std::vector<std::vector<int>> dist_arr(size, std::vector<int>(num_nodes));
+    std::vector<std::vector<int>> dist_arr(size, std::vector<int>(num_nodes)); // holds distance array
 
     #pragma omp parallel for num_threads(32) schedule(dynamic)
     for (int v = 0; v < size; v++)
@@ -951,14 +813,20 @@ void Graph::closeness_centrality_approx(std::vector<std::pair<int, float>> &orde
         int sum_of_dist = 0;
         for (int i = 0; i < size; i++)
         {
-            sum_of_dist += dist_arr[i][v];
+            sum_of_dist += dist_arr[i][v]; // calculates sum of distances for each node
         }
-        float coeff = sum_of_dist > 0 ? (float)size / sum_of_dist : 0; // if coefficient is negative(meaning that graph is not connected) assign to 0
+        // if coefficient is negative(meaning that graph is not connected) assign to 0
+        float coeff = sum_of_dist > 0 ? (float)size / sum_of_dist : 0;
         ordering[v] = std::make_pair(v, coeff);
     }
 }
 
-
+/**
+ * Calculates an approximation for closeness centrality especially for big sized graphs
+ * A size is taken as an input and size many BFS algorithms are run. Values are approximated
+ * using these BFS results.
+ * Closeness formula is: number of nodes / sum of all distances from selected node
+ * */
 void Graph::closeness_centrality_approx(std::vector<float> &ordering, int size)
 {
     ordering = std::vector<float>(num_nodes);
@@ -985,11 +853,17 @@ void Graph::closeness_centrality_approx(std::vector<float> &ordering, int size)
         {
             sum_of_dist += dist_arr[i][v];
         }
-        float coeff = sum_of_dist > 0 ? (float)size / sum_of_dist : 0; // if coefficient is negative(meaning that graph is not connected) assign to 0
+        // if coefficient is negative(meaning that graph is not connected) assign to 0
+        float coeff = sum_of_dist > 0 ? (float)size / sum_of_dist : 0; 
         ordering[v] = coeff;
     }
 }
 
+
+/**
+ * Checks how many triangular node bingings each node has
+ * First element of the "ordering" pair is the node number, second is the clustering value
+ * */
 void Graph::clustering_coeff(std::vector<std::pair<int, float>> &ordering)
 {
     ordering = std::vector<std::pair<int, float>>(num_nodes);
@@ -1022,7 +896,9 @@ void Graph::clustering_coeff(std::vector<std::pair<int, float>> &ordering)
     }
 }
 
-
+/**
+ * Checks how many triangular node bingings each node has
+ * */
 void Graph::clustering_coeff(std::vector<float> &ordering)
 {
     ordering = std::vector<float>(num_nodes);
@@ -1056,8 +932,11 @@ void Graph::clustering_coeff(std::vector<float> &ordering)
 }
 
 
-
-
+/**
+ * Runs Google's PageRank algorithm implementation. Iteration count and alpha (update rate)
+ * are taken as inputs
+ * First element of the "ordering" pair is the node number, second is the PageRank value
+ * */
 void Graph::page_rank(std::vector<std::pair<int, float>> &ordering, int iter, float alpha)
 {
     ordering = std::vector<std::pair<int, float>>(num_nodes);
@@ -1094,6 +973,10 @@ void Graph::page_rank(std::vector<std::pair<int, float>> &ordering, int iter, fl
 }
 
 
+/**
+ * Runs Google's PageRank algorithm implementation. Iteration count and alpha (update rate)
+ * are taken as inputs
+ * */
 void Graph::page_rank(std::vector<float> &ordering, int iter, float alpha)
 {
     ordering = std::vector<float>(num_nodes);
@@ -1125,8 +1008,10 @@ void Graph::page_rank(std::vector<float> &ordering, int iter, float alpha)
     }
 }
 
-/* HELPER METHODS */
-
+// HELPER METHODS
+/**
+ * Implementatipon of BFS algorithm with queue logic.
+ * */
 void Graph::bfs(int start_node, std::vector<int> &distance_arr, int step_size)
 {
     std::vector<int> frontier(num_nodes, -1);
@@ -1159,8 +1044,7 @@ void Graph::bfs(int start_node, std::vector<int> &distance_arr, int step_size)
     }
 }
 
-/* PRINTER METHODS */
-
+// PRINTER METHODS
 void Graph::print_graph()
 {
     std::cout << "Path: " << relative_path << std::endl
@@ -1169,8 +1053,10 @@ void Graph::print_graph()
               << "Graph Family: " << family << std::endl;
 }
 
-/* STATIC METHODS */
-
+// STATIC METHODS
+/**
+ * Standard normalization function for single ordering vector
+ * */
 void Graph::normal_params(std::vector<std::pair<int, float>> &order, float &mean, float &stdev)
 {
     float sum = 0;
@@ -1186,6 +1072,10 @@ void Graph::normal_params(std::vector<std::pair<int, float>> &order, float &mean
         stdev = 0.001;
 }
 
+
+/**
+ * Standard normalization function for collection of ordering vectors.
+ * */
 void Graph::normalize(std::vector<std::vector<std::pair<int, float>>> &orders, int num)
 {
     if (num == -1)
@@ -1199,6 +1089,10 @@ void Graph::normalize(std::vector<std::vector<std::pair<int, float>>> &orders, i
         for_each(orders[i].begin(), orders[i].end(), [mean, stdev](std::pair<int, float> &x) { x.second = (x.second - mean) / stdev; });
     }
 }
+
+/**
+ * Helper functions for sort and vector related operation
+ * */
 
 bool Graph::descending(const std::pair<int, float> &left, const std::pair<int, float> &right)
 {

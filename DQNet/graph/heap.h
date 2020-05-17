@@ -1,3 +1,7 @@
+/**
+ * Implementation of heap data structure.
+ * */
+
 #ifndef HEAP_H
 #define HEAP_H
 

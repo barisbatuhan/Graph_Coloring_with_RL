@@ -1,3 +1,8 @@
+/**
+ * Undirected and unweighted graph class implementation along with vertex ordering heuristics.
+ * Detailed explanation of each method can be viewed in graph.cpp folder
+ * */
+
 #ifndef GRAPH_HPP
 #define GRAPH_HPP
 
@@ -76,12 +81,13 @@ public:
 
     std::vector<int> row_ptr;
     std::vector<int> col_ind;
+    std::string relative_path;
     int num_nodes;
     int num_edges;
+    int max_degree;
 
 private:
     std::string family;
-    std::string relative_path;
 
     // static helper methods
     static void normal_params(std::vector<std::pair<int, float>> &ordering, float &mean, float &stdev);
